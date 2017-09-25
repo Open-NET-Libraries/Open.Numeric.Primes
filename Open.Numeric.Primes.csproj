@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <Authors>electricessence</Authors>
+    <Company />
+    <Product />
+    <Description>Methods and extensions for prime number detection and discovery.
+
+Part of the "Open" set of libraries.</Description>
+    <Copyright>https://github.com/electricessence/Open.Numeric.Primes/blob/master/LISCENSE.md</Copyright>
+    <PackageLicenseUrl>https://github.com/electricessence/Open.Numeric.Primes/blob/master/LISCENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/electricessence/Open.Numeric.Primes/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/electricessence/Open.Numeric.Primes/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>prime-numbers, primes, prime-factorization, prime-detection, prime-discovery</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+</Project>
