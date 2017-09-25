@@ -201,11 +201,11 @@ namespace Open.Numeric.Primes
                 yield return sign * n;
         }
 
-        internal static IEnumerable<BigInteger> ValidPrimeTests(BigInteger staringAt)
+        internal static IEnumerable<BigInteger> ValidPrimeTestsBig(BigInteger? staringAt = null)
         {
-            var sign = staringAt.Sign;
+            var sign = staringAt?.Sign ?? 1;
             if(sign==0) sign = 1;
-            var n = BigInteger.Abs(staringAt);
+            var n = BigInteger.Abs(staringAt ?? BigInteger.One);
 
             if (n > 2)
             {
@@ -229,10 +229,10 @@ namespace Open.Numeric.Primes
         /// Returns an enumerable that will iterate every prime starting at the starting value.
         /// </summary>
         /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-        /// <returns></returns>
-        public static IEnumerable<BigInteger> Numbers(BigInteger staringAt)
+        /// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
+        public static IEnumerable<BigInteger> NumbersBig(BigInteger? staringAt = null)
         {
-            return ValidPrimeTests(staringAt)
+            return ValidPrimeTestsBig(staringAt)
                 .Where(v => Number.IsPrime(v));
         }
 
@@ -240,7 +240,7 @@ namespace Open.Numeric.Primes
         /// Returns an enumerable that will iterate every prime starting at the starting value.
         /// </summary>
         /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-        /// <returns></returns>
+        /// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
         public static IEnumerable<ulong> Numbers(ulong staringAt = 2)
         {
             return ValidPrimeTests(staringAt)
@@ -251,11 +251,39 @@ namespace Open.Numeric.Primes
         /// Returns an enumerable that will iterate every prime starting at the starting value.
         /// </summary>
         /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.  Passing a negative number here will produce a negative set of prime numbers.</param>
-        /// <returns></returns>
+        /// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
         public static IEnumerable<long> Numbers(long staringAt)
         {
             return ValidPrimeTests(staringAt)
                 .Where(v => Number.IsPrime(v));
+        }
+
+        /// <summary>
+        /// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
+        /// So the first entry is always {Key=1, Value=2}.
+        /// </summary>
+        public static IEnumerable<KeyValuePair<BigInteger, BigInteger>> NumbersIndexedBig()
+        {
+            var count = BigInteger.Zero;
+            foreach(var n in NumbersBig())
+            {
+                count++;
+                yield return new KeyValuePair<BigInteger, BigInteger>(count, n);
+            }
+        }
+
+        /// <summary>
+        /// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
+        /// So the first entry is always {Key=1, Value=2}.
+        /// </summary>
+        public static IEnumerable<KeyValuePair<ulong, ulong>> NumbersIndexed()
+        {
+            ulong count = 0L;
+            foreach (var n in Numbers())
+            {
+                count++;
+                yield return new KeyValuePair<ulong, ulong>(count, n);
+            }
         }
 
         /// <summary>
@@ -298,9 +326,9 @@ namespace Open.Numeric.Primes
         /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
         /// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
         /// <returns></returns>
-        public static ParallelQuery<BigInteger> NumbersInParallel(BigInteger staringAt, ushort? degreeOfParallelism = null)
+        public static ParallelQuery<BigInteger> NumbersBigInParallel(BigInteger? staringAt = null, ushort? degreeOfParallelism = null)
         {
-            var tests = ValidPrimeTests(staringAt)
+            var tests = ValidPrimeTestsBig(staringAt ?? BigInteger.One)
                 .AsParallel().AsOrdered();
 
             if (degreeOfParallelism.HasValue)
@@ -326,7 +354,7 @@ namespace Open.Numeric.Primes
         /// <returns>The next prime after the number provided.</returns>
         public static BigInteger Next(BigInteger after)
         {
-            return Numbers(after + BigInteger.One).First();
+            return NumbersBig(after + BigInteger.One).First();
         }
 
         /// <summary>
@@ -462,7 +490,7 @@ namespace Open.Numeric.Primes
             value = BigInteger.Abs(value);
             BigInteger last = BigInteger.One;
 
-            foreach (var p in Numbers(BigInteger.One))
+            foreach (var p in NumbersBig())
             {
                 BigInteger stop = value / last; // The list of possibilities shrinks for each test.
                 if (p > stop) break; // Exceeded possibilities? 
