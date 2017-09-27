@@ -162,6 +162,18 @@ namespace Open.Numeric.Primes
     /// </summary>
     public static class Prime
     {
+        static double ToDouble(float value)
+        {
+            // Need to propertly convert a float to double to avoid potential precision error.
+            if (float.IsNaN(value))
+                return double.NaN;
+            else if (float.IsPositiveInfinity(value))
+                return double.PositiveInfinity;
+            else if (float.IsNegativeInfinity(value))
+                return double.PositiveInfinity;
+            else
+                return double.Parse(value.ToString()); // Potential underlying precision error.  Seemingly whole numbers can be slightly off and not equate properly...
+        }
 
         internal static IEnumerable<ulong> ValidPrimeTests(ulong staringAt = 2)
         {
@@ -232,8 +244,17 @@ namespace Open.Numeric.Primes
         /// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
         public static IEnumerable<BigInteger> NumbersBig(BigInteger? staringAt = null)
         {
-            return ValidPrimeTestsBig(staringAt)
-                .Where(v => Number.IsPrime(v));
+            if(staringAt>=ulong.MaxValue)
+            {
+                return ValidPrimeTestsBig(staringAt)
+                    .Where(v => Number.IsPrime(v));
+            }
+
+            // Avoid potential 'big' math up until ulong.MaxValue.
+            return ValidPrimeTests((ulong)staringAt)
+                .Where(v => Number.IsPrime(v))
+                .Cast<BigInteger>()
+                .Concat(NumbersBig(ulong.MaxValue));
         }
 
         /// <summary>
@@ -328,13 +349,28 @@ namespace Open.Numeric.Primes
         /// <returns></returns>
         public static ParallelQuery<BigInteger> NumbersBigInParallel(BigInteger? staringAt = null, ushort? degreeOfParallelism = null)
         {
-            var tests = ValidPrimeTestsBig(staringAt ?? BigInteger.One)
-                .AsParallel().AsOrdered();
+            var s = staringAt ?? BigInteger.One;
+            if (s >= ulong.MaxValue)
+            {
+                var testsBig = ValidPrimeTestsBig(s)
+                    .AsParallel().AsOrdered();
+
+                if (degreeOfParallelism.HasValue)
+                    testsBig = testsBig.WithDegreeOfParallelism(degreeOfParallelism.Value);
+
+                return testsBig.Where(v => Number.IsPrime(v));
+            }
+
+            var tests = ValidPrimeTests((ulong)s)
+                    .AsParallel().AsOrdered();
 
             if (degreeOfParallelism.HasValue)
                 tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
 
-            return tests.Where(v => Number.IsPrime(v));
+            return tests
+                .Where(v => Number.IsPrime(v))
+                .Cast<BigInteger>()
+                .Concat(NumbersBigInParallel(ulong.MaxValue));
         }
 
         /// <summary>
@@ -375,13 +411,9 @@ namespace Open.Numeric.Primes
         /// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
         /// <returns>The next prime after the number provided.</returns>
         /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
-        public static long Next(double after)
+        public static BigInteger Next(double after)
         {
-            after = Math.Floor(after);
-            var afterLong = (long)after;
-            if (after != afterLong) // Precision and number size may cause these to be inequal.
-                throw new ArgumentException("Cannot coerce to a valid integer value.", "after");
-            return Next(afterLong);
+            return Next((BigInteger)after);
         }
 
         /// <summary>
@@ -390,9 +422,9 @@ namespace Open.Numeric.Primes
         /// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
         /// <returns>The next prime after the number provided.</returns>
         /// <exception cref="ArgumentException">Cannot coerce to a valid integer value.</exception>
-        public static long Next(float after)
+        public static BigInteger Next(float after)
         {
-            return Next((double)after); // Any problematic precision error is negated by the conversion to a whole number.
+            return Next((BigInteger)after); // Any problematic precision error is negated by the conversion to a whole number.
         }
 
         /// <summary>
@@ -405,34 +437,33 @@ namespace Open.Numeric.Primes
             return Next((BigInteger)after);
         }
 
+
         /// <summary>
         /// Iterates the prime factors of the provided value.
         /// First multiple is always 0 or 1 (and for other overloads can be -1).
         /// </summary>
-        /// <param name="value">Value to verify.</param>
+        /// <param name="value">The value to factorize.</param>
         /// <returns>An enumerable that contains the prime factors of the provided value starting with 0 or 1 for sign retention.</returns>
-        public static IEnumerable<ulong> FactorsOf(ulong value)
+        public static IEnumerable<ulong> Factors(ulong value)
         {
-            if (value == 0)
+            if (value != 0UL)
             {
-                yield return 0;
-                yield break;
-            }
+                yield return 1;
+                ulong last = 1;
 
-            yield return 1;
-            ulong last = 1;
-
-            foreach (var p in Numbers())
-            {
-                ulong stop = value / last; // The list of possibilities shrinks for each test.
-                if (p > stop) break; // Exceeded possibilities? 
-                while ((value % p) == 0)
+                // For larger numbers, a quick prime check can prevent large iterations.
+                if(!Number.IsPrime(value)) foreach (var p in Numbers())
                 {
-                    value /= p;
-                    yield return p;
-                    if (value == 1) yield break;
+                    ulong stop = value / last; // The list of possibilities shrinks for each test.
+                    if (p > stop) break; // Exceeded possibilities? 
+                    while ((value % p) == 0)
+                    {
+                        value /= p;
+                        yield return p;
+                        if (value == 1) yield break;
+                    }
+                    last = p;
                 }
-                last = p;
             }
 
             yield return value;
@@ -442,31 +473,78 @@ namespace Open.Numeric.Primes
         /// Iterates the prime factors of the provided value.
         /// First multiple is always 0, 1 or -1.
         /// </summary>
-        /// <param name="value">Value to verify.</param>
+        /// <param name="value">The value to factorize.</param>
         /// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
-        public static IEnumerable<long> FactorsOf(long value)
+        public static IEnumerable<long> Factors(long value)
         {
-            if (value == 0L)
+            if (value != 0L)
             {
-                yield return 0L;
-                yield break;
-            }
+                yield return value < 0L ? -1L : 1L;
+                if (value < 0L) value = Math.Abs(value);
+                if (value == 1L)
+                    yield break;
 
-            yield return value < 0L ? -1L : 1L;
-            value = Math.Abs(value);
-            long last = 1L;
+                long last = 1L;
 
-            foreach (var p in Numbers(2L))
-            {
-                long stop = value / last; // The list of possibilities shrinks for each test.
-                if (p > stop) break; // Exceeded possibilities? 
-                while ((value % p) == 0)
+                // For larger numbers, a quick prime check can prevent large iterations.
+                if (!Number.IsPrime(value)) foreach (var p in Numbers(2L))
                 {
-                    value /= p;
-                    yield return p;
-                    if (value == 1) yield break;
+                    long stop = value / last; // The list of possibilities shrinks for each test.
+                    if (p > stop) break; // Exceeded possibilities? 
+                    while ((value % p) == 0)
+                    {
+                        value /= p;
+                        yield return p;
+                        if (value == 1) yield break;
+                    }
+                    last = p;
                 }
-                last = p;
+            }
+            yield return value;
+        }
+
+        /// <summary>
+        /// Iterates the prime factors of the provided value.
+        /// First multiple is always 0, 1 or -1.
+        /// </summary>
+        /// <param name="value">Value to factorize.</param>
+        /// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
+        public static IEnumerable<BigInteger> Factors(BigInteger value)
+        {
+            if (value != BigInteger.Zero)
+            {
+                yield return value < BigInteger.Zero ? BigInteger.MinusOne : BigInteger.One;
+                value = BigInteger.Abs(value);
+                if (value == BigInteger.One)
+                    yield break;
+
+                if(value<=ulong.MaxValue)
+                {
+                    // Use more efficient ulong instead.
+                    foreach (var n in Factors((ulong)value).Skip(1))
+                        yield return n;
+                    yield break;
+                }
+                else
+                {
+                    BigInteger last = BigInteger.One;
+
+                    // For larger numbers, a quick prime check can prevent large iterations.
+                    if (!Number.IsPrime(value)) foreach (var p in NumbersBig())
+                    {
+                        BigInteger stop = value / last; // The list of possibilities shrinks for each test.
+                        if (p > stop) break; // Exceeded possibilities? 
+                        while ((value % p) == 0)
+                        {
+                            value /= p;
+                            yield return p;
+                            if (value == 1) yield break;
+                        }
+                        last = p;
+                    }
+                }
+
+
             }
 
             yield return value;
@@ -476,34 +554,129 @@ namespace Open.Numeric.Primes
         /// Iterates the prime factors of the provided value.
         /// First multiple is always 0, 1 or -1.
         /// </summary>
-        /// <param name="value">Value to verify.</param>
-        /// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
-        public static IEnumerable<BigInteger> FactorsOf(BigInteger value)
+        /// <param name="value">The value to factorize.</param>
+        /// <returns>
+        /// An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.
+        /// Value types may differ depending on the magnitude of the provided value.
+        /// </returns>
+        public static IEnumerable<dynamic> Factors(double value)
         {
-            if (value == BigInteger.Zero)
+            if (double.IsNaN(value) || value==0)
             {
-                yield return BigInteger.Zero;
-                yield break;
+                yield return value;
             }
-
-            yield return value < BigInteger.Zero ? BigInteger.MinusOne : BigInteger.One;
-            value = BigInteger.Abs(value);
-            BigInteger last = BigInteger.One;
-
-            foreach (var p in NumbersBig())
+            else
             {
-                BigInteger stop = value / last; // The list of possibilities shrinks for each test.
-                if (p > stop) break; // Exceeded possibilities? 
-                while ((value % p) == 0)
+                yield return value < 1 ? -1 : 1;
+                if (value < 0) value = Math.Abs(value);
+                if (value == 1L)
+                    yield break;
+
+                if(value!=Math.Floor(value) || double.IsInfinity(value))
                 {
-                    value /= p;
-                    yield return p;
-                    if (value == 1) yield break;
+                    yield return value;
                 }
-                last = p;
+                else
+                {
+                    if (value <= ulong.MaxValue)
+                    {
+                        // Use more efficient ulong instead.
+                        foreach (var n in Factors((ulong)value).Skip(1))
+                            yield return n;
+                        yield break;
+                    }
+                    else
+                    {
+                        foreach (var b in Factors((BigInteger)value).Skip(1))
+                            yield return b;
+                        yield break;
+                    }
+                }
             }
+        }
 
-            yield return value;
+        /// <summary>
+        /// Iterates the prime factors of the provided value.
+        /// First multiple is always 0, 1 or -1.
+        /// </summary>
+        /// <param name="value">The value to factorize.</param>
+        /// <returns>
+        /// An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.
+        /// Value types may differ depending on the magnitude of the provided value.
+        /// </returns>
+        public static IEnumerable<dynamic> Factors(float value)
+        {
+            return Factors(ToDouble(value));
+        }
+
+        /// <summary>
+        /// Iterates the prime factors of the provided value.
+        /// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
+        /// Else if the value is prime or not a whole number, then there will be no results.
+        /// </summary>
+        /// <param name="value">The value to factorize.</param>
+        /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+        public static IEnumerable<dynamic> Factors(double value, bool omitOneAndValue)
+        {
+            return omitOneAndValue
+                ? Factors(value).Skip(1).TakeWhile(v => v != value)
+                : Factors(value);
+        }
+
+        /// <summary>
+        /// Iterates the prime factors of the provided value.
+        /// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
+        /// Else if the value is prime or not a whole number, then there will be no results.
+        /// </summary>
+        /// <param name="value">The value to factorize.</param>
+        /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned..</param>
+        public static IEnumerable<dynamic> Factors(float value, bool omitOneAndValue)
+        {
+            return omitOneAndValue
+                ? Factors(value).Skip(1).TakeWhile(v => v != value)
+                : Factors(value);
+        }
+
+        /// <summary>
+        /// Iterates the prime factors of the provided value.
+        /// If omitOneAndValue==false, first multiple is always 0 or 1.
+        /// Else if the value is prime, then there will be no results.
+        /// </summary>
+        /// <param name="value">The value to factorize.</param>
+        /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+        public static IEnumerable<ulong> Factors(ulong value, bool omitOneAndValue)
+        {
+            return omitOneAndValue
+                ? Factors(value).Skip(1).TakeWhile(v => v != value)
+                : Factors(value);
+        }
+
+        /// <summary>
+        /// Iterates the prime factors of the provided value.
+        /// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
+        /// Else if the value is prime, then there will be no results.
+        /// </summary>
+        /// <param name="value">The value to factorize.</param>
+        /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+        public static IEnumerable<long> Factors(long value, bool omitOneAndValue)
+        {
+            return omitOneAndValue
+                ? Factors(value).Skip(1).TakeWhile(v => v != value)
+                : Factors(value);
+        }
+
+        /// <summary>
+        /// Iterates the prime factors of the provided value.
+        /// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
+        /// Else if the value is prime, then there will be no results.
+        /// </summary>
+        /// <param name="value">The value to factorize.</param>
+        /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+        public static IEnumerable<BigInteger> Factors(BigInteger value, bool omitOneAndValue)
+        {
+            return omitOneAndValue
+                ? Factors(value).Skip(1).TakeWhile(v => v != value)
+                : Factors(value);
         }
 
     }
@@ -640,7 +813,7 @@ namespace Open.Numeric.Primes
             /// </summary>
             /// <returns>The next prime after the number provided.</returns>
             /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
-            public static long NextPrime(this float value)
+            public static BigInteger NextPrime(this float value)
             {
                 return Prime.Next(value);
             }
@@ -650,7 +823,7 @@ namespace Open.Numeric.Primes
             /// </summary>
             /// <returns>The next prime after the number provided.</returns>
             /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
-            public static long NextPrime(this double value)
+            public static BigInteger NextPrime(this double value)
             {
                 return Prime.Next(value);
             }
@@ -667,33 +840,57 @@ namespace Open.Numeric.Primes
 
             /// <summary>
             /// Iterates the prime factors of the provided value.
-            /// First multiple is always 0, or 1.
+            /// If omitOneAndValue==false, first multiple is always 0 or 1.
+            /// Else if the value is prime, then there will be no results.
             /// </summary>
-            /// <returns>An enumerable that contains the prime factors of the provided value starting with 0, or 1 for sign retention.</returns>
-            public static IEnumerable<ulong> PrimeFactors(this ulong value)
+            /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+            public static IEnumerable<ulong> PrimeFactors(this ulong value, bool omitOneAndValue = false)
             {
-                return Prime.FactorsOf(value);
+                return Prime.Factors(value, omitOneAndValue);
             }
 
             /// <summary>
             /// Iterates the prime factors of the provided value.
-            /// First multiple is always 0, 1 or -1.
+            /// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
+            /// Else if the value is prime, then there will be no results.
             /// </summary>
-            /// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
-            public static IEnumerable<long> PrimeFactors(this long value)
+            /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+            public static IEnumerable<long> PrimeFactors(this long value, bool omitOneAndValue = false)
             {
-                return Prime.FactorsOf(value);
+                return Prime.Factors(value, omitOneAndValue);
             }
-
 
             /// <summary>
             /// Iterates the prime factors of the provided value.
-            /// First multiple is always 0, 1 or -1.
+            /// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
+            /// Else if the value is prime, then there will be no results.
             /// </summary>
-            /// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
-            public static IEnumerable<BigInteger> PrimeFactors(this BigInteger value)
+            /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+            public static IEnumerable<BigInteger> PrimeFactors(this BigInteger value, bool omitOneAndValue = false)
             {
-                return Prime.FactorsOf(value);
+                return Prime.Factors(value, omitOneAndValue);
+            }
+
+            /// <summary>
+            /// Iterates the prime factors of the provided value.
+            /// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
+            /// Else if the value is prime or not a whole number, then there will be no results.
+            /// </summary>
+            /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+            public static IEnumerable<dynamic> PrimeFactors(this double value, bool omitOneAndValue = false)
+            {
+                return Prime.Factors(value, omitOneAndValue);
+            }
+
+            /// <summary>
+            /// Iterates the prime factors of the provided value.
+            /// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
+            /// Else if the value is prime or not a whole number, then there will be no results.
+            /// </summary>
+            /// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+            public static IEnumerable<dynamic> PrimeFactors(this float value, bool omitOneAndValue = false)
+            {
+                return Prime.Factors(value, omitOneAndValue);
             }
         }
     }
