@@ -12,6 +12,17 @@ namespace Open.Numeric.Primes.Tests
                 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37
         };
 
+
+        [TestMethod]
+        public void Primes_ULongByDivision()
+        {
+            var i = 0;
+            foreach (var p in Prime.NumbersByDivision().Take(FIRST_PRIMES.Length))
+            {
+                Assert.AreEqual(FIRST_PRIMES[i++], p);
+            }
+        }
+
         [TestMethod]
         public void Primes_ULong()
         {
@@ -142,13 +153,13 @@ namespace Open.Numeric.Primes.Tests
             }
         }
 
-        const int SPEEDTEST_LIMIT = 1000000;
+        const int SPEEDTEST_LIMIT = 300000;
         [TestMethod]
         public void PrimeSpeed_Ulong()
         {
             ulong result = 0;
             foreach (var p in Prime
-                .Numbers()
+                .Numbers(100000000UL)
                 .Take(SPEEDTEST_LIMIT))
             {
                 result = p;
