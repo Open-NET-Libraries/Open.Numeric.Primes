@@ -11,15 +11,21 @@ namespace Open.Numeric.Primes
     /// </summary>
     public static class Number
     {
-        static bool IsPrimeInternal(ulong value)
+        const ulong MAX_ULONG_DIVISOR = 25043747693UL;
+        //const ulong MAX_ULONG_FOR_PRIMES = 18446744028140123536;
+
+        static bool IsPrimeInternal(ulong value, ulong divisor)
         {
-            if (value < 380000)
+            if (divisor > MAX_ULONG_DIVISOR)
+                return IsPrimeInternalBig(value, divisor);
+
+            if (value < 380000UL)
             {
                 // This method is faster up until a point.
                 double squared = Math.Sqrt(value);
-                ulong flooredAndSquared = Convert.ToUInt64(Math.Floor(squared));
+                double flooredAndSquared = Math.Floor(squared);
 
-                for (ulong idx = 3; idx <= flooredAndSquared; idx++)
+                for (double idx = 3; idx <= flooredAndSquared; idx++)
                 {
                     if (value % idx == 0)
                     {
@@ -29,10 +35,8 @@ namespace Open.Numeric.Primes
             }
             else
             {
-                ulong divisor = 6;
                 while (divisor * divisor - 2 * divisor + 1 <= value)
                 {
-
                     if (value % (divisor - 1) == 0)
                         return false;
 
@@ -40,17 +44,17 @@ namespace Open.Numeric.Primes
                         return false;
 
                     divisor += 6;
+
+                    if (divisor > MAX_ULONG_DIVISOR)
+                        return IsPrimeInternalBig(value, divisor);
                 }
             }
-
-
 
             return true;
         }
 
-        static bool IsPrimeInternal(BigInteger value)
+        static bool IsPrimeInternalBig(BigInteger value, BigInteger divisor)
         {
-            BigInteger divisor = 6;
             while (divisor * divisor - 2 * divisor + 1 <= value)
             {
 
@@ -87,7 +91,7 @@ namespace Open.Numeric.Primes
                 default:
                     return value % 2 != 0
                         && value % 3 != 0
-                        && IsPrimeInternal(value);
+                        && IsPrimeInternal(value, 6);
             }
 
         }
@@ -99,15 +103,18 @@ namespace Open.Numeric.Primes
         /// <returns>True if the provided value is a prime number</returns>
         public static bool IsPrime(BigInteger value)
         {
-            value = BigInteger.Abs(value);
-            if (value == 0 || value == 1)
+            if (value.IsZero || value.IsOne)
                 return false;
-            if (value == 2 || value == 3)
-                return true;
+            value = BigInteger.Abs(value);
+            if (value.IsOne)
+                return false;
+
+            if (value <= ulong.MaxValue)
+                return IsPrime((ulong)value);
 
             return value % 2 != 0
                 && value % 3 != 0
-                && IsPrimeInternal(value);
+                && IsPrimeInternalBig(value, 6);
         }
 
         /// <summary>
@@ -244,16 +251,17 @@ namespace Open.Numeric.Primes
         /// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
         public static IEnumerable<BigInteger> NumbersBig(BigInteger? staringAt = null)
         {
-            if(staringAt>=ulong.MaxValue)
+            var s = staringAt ?? BigInteger.One;
+            if (s>=ulong.MaxValue)
             {
-                return ValidPrimeTestsBig(staringAt)
+                return ValidPrimeTestsBig(s)
                     .Where(v => Number.IsPrime(v));
             }
 
             // Avoid potential 'big' math up until ulong.MaxValue.
-            return ValidPrimeTests((ulong)staringAt)
+            return ValidPrimeTests((ulong)s)
                 .Where(v => Number.IsPrime(v))
-                .Cast<BigInteger>()
+                .Select(v=>(BigInteger)v)
                 .Concat(NumbersBig(ulong.MaxValue));
         }
 
@@ -369,7 +377,7 @@ namespace Open.Numeric.Primes
 
             return tests
                 .Where(v => Number.IsPrime(v))
-                .Cast<BigInteger>()
+                .Select(v => (BigInteger)v)
                 .Concat(NumbersBigInParallel(ulong.MaxValue));
         }
 
