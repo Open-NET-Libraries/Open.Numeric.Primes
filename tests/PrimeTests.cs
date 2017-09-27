@@ -141,5 +141,33 @@ namespace Open.Numeric.Primes.Tests
                 );
             }
         }
+
+        const int SPEEDTEST_LIMIT = 1000000;
+        [TestMethod]
+        public void PrimeSpeed_Ulong()
+        {
+            ulong result = 0;
+            foreach (var p in Prime
+                .Numbers()
+                .Take(SPEEDTEST_LIMIT))
+            {
+                result = p;
+            }
+            Assert.IsTrue(true);
+        }
+
+        [TestMethod]
+        public void PrimeSpeed_BigInt()
+        {
+            BigInteger result = 0;
+            foreach (var p in Prime
+                .NumbersBig()
+                .Take(SPEEDTEST_LIMIT))
+            {
+                result = p;
+            }
+            Assert.IsTrue(true);
+        }
+
     }
 }
