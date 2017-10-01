@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <Authors>electricessence</Authors>
@@ -19,9 +18,10 @@ Part of the "Open" set of libraries.</Description>
     <AssemblyVersion>1.0.0.1</AssemblyVersion>
     <FileVersion>1.0.0.1</FileVersion>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>True</Optimize>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Open.Collections" Version="1.1.0" />
+  </ItemGroup>
 </Project>

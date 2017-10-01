@@ -19,6 +19,7 @@ namespace Open.Numeric.Primes
             FirstPrimes = Prime.NumbersByDivision().Take(1000).ToArray();
         }
 
+
         const ulong MAX_ULONG_DIVISOR = 25043747693UL;
         //const ulong MAX_ULONG_FOR_PRIMES = 18446744028140123536;
 
