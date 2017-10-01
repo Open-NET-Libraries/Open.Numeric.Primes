@@ -22,20 +22,6 @@ namespace Open.Numeric.Primes
         }
         public abstract IEnumerable<T> Numbers();
 
-        protected abstract IEnumerable<T> NumbersMemoizable();
-
-        LazyList<T> _memoized;
-        public IEnumerable<T> NumbersMemoized()
-        {
-            return LazyInitializer
-                .EnsureInitialized(ref _memoized,
-                    () => NumbersMemoizable().Memoize());
-        }
-
-        protected static readonly IReadOnlyList<ulong> Known
-            = (new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23 })
-                .ToList().AsReadOnly();
-
         public abstract IEnumerable<KeyValuePair<T, T>> NumbersIndexed();
 
         public abstract ParallelQuery<T> NumbersInParallel(T staringAt, ushort? degreeOfParallelism = null);
@@ -70,30 +56,11 @@ namespace Open.Numeric.Primes
             return Numbers(2);
         }
 
-        protected override IEnumerable<ulong> NumbersMemoizable()
-        {
-            ulong last = 1;
-            foreach (var n in Known)
-            {
-                yield return n;
-                last = n;
-            }
-
-            /*
-             * Note: here is where things start to recurse but should work perfectly
-             * as the next primes can only be discovered by their predecessors.
-             */
-            foreach (var n in ValidPrimeTests(last + 1).Where(p => IsPrime(p)))
-            {
-                yield return n;
-            }
-        }
 
         /// <summary>
         /// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
         /// So the first entry is always {Key=1, Value=2}.
         /// </summary>
-
         public override IEnumerable<KeyValuePair<ulong, ulong>> NumbersIndexed()
         {
             ulong count = 0L;
@@ -210,25 +177,6 @@ namespace Open.Numeric.Primes
             {
                 count++;
                 yield return new KeyValuePair<BigInteger, BigInteger>(count, n);
-            }
-        }
-
-        protected override IEnumerable<BigInteger> NumbersMemoizable()
-        {
-            BigInteger last = 1;
-            foreach (var n in Known)
-            {
-                yield return n;
-                last = n;
-            }
-
-            /*
-             * Note: here is where things start to recurse but should work perfectly
-             * as the next primes can only be discovered by their predecessors.
-             */
-            foreach (var n in ValidPrimeTests(last + 1).Where(p => IsPrime(p)))
-            {
-                yield return n;
             }
         }
 
