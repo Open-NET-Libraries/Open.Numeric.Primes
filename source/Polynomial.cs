@@ -10,16 +10,8 @@ namespace Open.Numeric.Primes
     {
         const ulong MAX_ULONG_DIVISOR = 25043747693UL;
 
-        public static bool IsPrime(ulong value)
+        internal static bool IsPrimeInternal(ulong value)
         {
-            if (value == 0 || value == 1)
-                return false;
-            if (value == 2 || value == 3)
-                return true;
-
-            if (value % 2 == 0 || value % 3 == 0)
-                return false;
-
             ulong divisor = 6;
             while (divisor * divisor - 2 * divisor + 1 <= value)
             {
@@ -35,6 +27,27 @@ namespace Open.Numeric.Primes
                     return IsPrime(value, divisor);
             }
             return true;
+        }
+
+        public static bool IsPrime(ulong value)
+        {
+            switch (value)
+            {
+                // 0 and 1 are not prime numbers
+                case 0:
+                case 1:
+                    return false;
+                case 2:
+                case 3:
+                    return true;
+
+                default:
+
+                    if (value % 2 == 0 || value % 3 == 0)
+                        return false;
+
+                    return IsPrimeInternal(value);
+            }
         }
 
         public static bool IsPrime(BigInteger value)
@@ -57,7 +70,6 @@ namespace Open.Numeric.Primes
         {
             while (divisor * divisor - 2 * divisor + 1 <= value)
             {
-
                 if (value % (divisor - 1) == 0)
                     return false;
 
@@ -72,17 +84,17 @@ namespace Open.Numeric.Primes
 
         public class U64 : PrimalityU64Base
         {
-            public override bool IsPrime(ulong value)
+            protected override bool IsPrimeInternal(ulong value)
             {
-                return Polynomial.IsPrime(value);
+                return Polynomial.IsPrimeInternal(value);
             }
         }
 
         public class BigInt : PrimalityBigIntBase
         {
-            public override bool IsPrime(BigInteger value)
+            protected override bool IsPrimeInternal(BigInteger value)
             {
-                return Polynomial.IsPrime(value);
+                return Polynomial.IsPrime(value, 6UL);
             }
         }
     }

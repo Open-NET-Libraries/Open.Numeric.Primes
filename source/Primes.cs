@@ -12,73 +12,6 @@ namespace Open.Numeric.Primes
     /// </summary>
     public static class Number
     {
-        static ulong[] FirstPrimes;
-
-        static Number()
-        {
-            FirstPrimes = Prime.NumbersByDivision().Take(1000).ToArray();
-        }
-
-
-        const ulong MAX_ULONG_DIVISOR = 25043747693UL;
-        //const ulong MAX_ULONG_FOR_PRIMES = 18446744028140123536;
-
-        static bool IsPrimeInternal(ulong value, ulong divisor)
-        {
-            if (divisor > MAX_ULONG_DIVISOR)
-                return IsPrimeInternalBig(value, divisor);
-
-            if (value < 380000UL)
-            {
-                // This method is faster up until a point.
-                double squared = Math.Sqrt(value);
-                double flooredAndSquared = Math.Floor(squared);
-
-                for (double idx = 3; idx <= flooredAndSquared; idx++)
-                {
-                    if (value % idx == 0)
-                    {
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                while (divisor * divisor - 2 * divisor + 1 <= value)
-                {
-                    if (value % (divisor - 1) == 0)
-                        return false;
-
-                    if (value % (divisor + 1) == 0)
-                        return false;
-
-                    divisor += 6;
-
-                    if (divisor > MAX_ULONG_DIVISOR)
-                        return IsPrimeInternalBig(value, divisor);
-                }
-            }
-
-            return true;
-        }
-
-        static bool IsPrimeInternalBig(BigInteger value, BigInteger divisor)
-        {
-            while (divisor * divisor - 2 * divisor + 1 <= value)
-            {
-
-                if (value % (divisor - 1) == 0)
-                    return false;
-
-                if (value % (divisor + 1) == 0)
-                    return false;
-
-                divisor += 6;
-            }
-
-            return true;
-        }
-
         /// <summary>
         /// Validates if a number is prime.
         /// </summary>
@@ -86,31 +19,7 @@ namespace Open.Numeric.Primes
         /// <returns>True if the provided value is a prime number</returns>
         public static bool IsPrime(ulong value)
         {
-            switch (value)
-            {
-                // 0 and 1 are not prime numbers
-                case 0:
-                case 1:
-                    return false;
-
-                default:
-
-                    foreach(var p in FirstPrimes)
-                    {
-                        if (value == p)
-                            return true;
-                        var sqr = p * p;
-                        if (sqr == value)
-                            return false;
-                        if (sqr > value)
-                            return true;
-                        if (value % p == 0)
-                            return false;
-                    }
-
-                    return MillerRabin.IsPrime(value);
-            }
-
+            return Prime.Numbers.IsPrime(value);
         }
 
         /// <summary>
@@ -120,18 +29,7 @@ namespace Open.Numeric.Primes
         /// <returns>True if the provided value is a prime number</returns>
         public static bool IsPrime(BigInteger value)
         {
-            if (value.IsZero || value.IsOne)
-                return false;
-            value = BigInteger.Abs(value);
-            if (value.IsOne)
-                return false;
-
-            if (value <= ulong.MaxValue)
-                return IsPrime((ulong)value);
-
-            return value % 2 != 0
-                && value % 3 != 0
-                && IsPrimeInternalBig(value, 6);
+            return Prime.Numbers.Big.IsPrime(value);
         }
 
         /// <summary>
@@ -199,309 +97,7 @@ namespace Open.Numeric.Primes
                 return double.Parse(value.ToString()); // Potential underlying precision error.  Seemingly whole numbers can be slightly off and not equate properly...
         }
 
-        internal static IEnumerable<ulong> ValidPrimeTests(ulong staringAt = 2)
-        {
-            var n = staringAt;
-            if (n > 2)
-            {
-                if (n % 2 == 0)
-                    n++;
-            }
-            else
-            {
-                yield return 2;
-                n = 3;
-            }
-
-            for (; n < ulong.MaxValue - 1; n += 2)
-                yield return n;
-        }
-
-        internal static IEnumerable<long> ValidPrimeTests(long staringAt)
-        {
-            var sign = staringAt < 0 ? -1 : 1;
-            var n = Math.Abs(staringAt);
-
-            if (n > 2)
-            {
-                if (n % 2 == 0)
-                    n++;
-            }
-            else
-            {
-                yield return sign * 2;
-                n = 3;
-            }
-
-            for (; n < long.MaxValue - 1; n += 2)
-                yield return sign * n;
-        }
-
-        internal static IEnumerable<BigInteger> ValidPrimeTestsBig(BigInteger? staringAt = null)
-        {
-            var sign = staringAt?.Sign ?? 1;
-            if (sign == 0) sign = 1;
-            var n = BigInteger.Abs(staringAt ?? BigInteger.One);
-
-            if (n > 2)
-            {
-                if (n % 2 == 0)
-                    n++;
-            }
-            else
-            {
-                yield return sign * 2;
-                n = 3;
-            }
-
-            while (true)
-            {
-                yield return sign * n;
-                n += 2;
-            }
-        }
-
-        static readonly ulong[] Known = new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23 };
-        public static IEnumerable<ulong> NumbersByDivision()
-        {
-            var known = new LinkedList<ulong>();
-            var last = 0UL;
-            foreach (var k in Known)
-            {
-                yield return k;
-                last = k;
-                known.AddLast(k);
-            }
-
-            foreach (var n in ValidPrimeTests(last + 2))
-            {
-                last = 1L;
-                var pN = known.First;
-                do
-                {
-                    var p = pN.Value;
-                    ulong stop = n / last; // The list of possibilities shrinks for each test.
-                    if (p > stop)
-                    {
-                        known.AddLast(n);
-                        yield return n;
-                        pN = null;
-                    }
-                    else if (n == p || (n % p) == 0)
-                    {
-                        pN = null;
-                    }
-                    else
-                    {
-                        pN = pN.Next;
-                    }
-                    last = p;
-                }
-                while (pN != null);
-            }
-        }
-
-        /// <summary>
-        /// Returns an enumerable that will iterate every prime starting at the starting value.
-        /// </summary>
-        /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-        /// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
-        public static IEnumerable<BigInteger> NumbersBig(BigInteger? staringAt = null)
-        {
-            var s = staringAt ?? BigInteger.One;
-            if (s >= ulong.MaxValue)
-            {
-                return ValidPrimeTestsBig(s)
-                    .Where(v => Number.IsPrime(v));
-            }
-
-            // Avoid potential 'big' math up until ulong.MaxValue.
-            return ValidPrimeTests((ulong)s)
-                .Where(v => Number.IsPrime(v))
-                .Select(v => (BigInteger)v)
-                .Concat(NumbersBig(ulong.MaxValue));
-        }
-
-        /// <summary>
-        /// Returns an enumerable that will iterate every prime starting at the starting value.
-        /// </summary>
-        /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-        /// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
-        public static IEnumerable<ulong> Numbers(ulong staringAt = 2)
-        {
-            return ValidPrimeTests(staringAt)
-                .Where(v => Number.IsPrime(v));
-        }
-
-        /// <summary>
-        /// Returns an enumerable that will iterate every prime starting at the starting value.
-        /// </summary>
-        /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.  Passing a negative number here will produce a negative set of prime numbers.</param>
-        /// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
-        public static IEnumerable<long> Numbers(long staringAt)
-        {
-            return ValidPrimeTests(staringAt)
-                .Where(v => Number.IsPrime(v));
-        }
-
-        /// <summary>
-        /// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
-        /// So the first entry is always {Key=1, Value=2}.
-        /// </summary>
-        public static IEnumerable<KeyValuePair<BigInteger, BigInteger>> NumbersIndexedBig()
-        {
-            var count = BigInteger.Zero;
-            foreach (var n in NumbersBig())
-            {
-                count++;
-                yield return new KeyValuePair<BigInteger, BigInteger>(count, n);
-            }
-        }
-
-        /// <summary>
-        /// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
-        /// So the first entry is always {Key=1, Value=2}.
-        /// </summary>
-        public static IEnumerable<KeyValuePair<ulong, ulong>> NumbersIndexed()
-        {
-            ulong count = 0L;
-            foreach (var n in Numbers())
-            {
-                count++;
-                yield return new KeyValuePair<ulong, ulong>(count, n);
-            }
-        }
-
-        /// <summary>
-        /// Returns a parallel enumerable that will iterate every prime starting at the starting value.
-        /// </summary>
-        /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-        /// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-        /// <returns></returns>
-        public static ParallelQuery<ulong> NumbersInParallel(ulong staringAt = 2, ushort? degreeOfParallelism = null)
-        {
-            var tests = ValidPrimeTests(staringAt)
-                .AsParallel().AsOrdered();
-
-            if (degreeOfParallelism.HasValue)
-                tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
-
-            return tests.Where(v => Number.IsPrime(v));
-        }
-
-        /// <summary>
-        /// Returns a parallel enumerable that will iterate every prime starting at the starting value.
-        /// </summary>
-        /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-        /// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-        /// <returns></returns>
-        public static ParallelQuery<long> NumbersInParallel(long staringAt, ushort? degreeOfParallelism = null)
-        {
-            var tests = ValidPrimeTests(staringAt)
-                .AsParallel().AsOrdered();
-
-            if (degreeOfParallelism.HasValue)
-                tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
-
-            return tests.Where(v => Number.IsPrime(v));
-        }
-
-        /// <summary>
-        /// Returns a parallel enumerable that will iterate every prime starting at the starting value.
-        /// </summary>
-        /// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-        /// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-        /// <returns></returns>
-        public static ParallelQuery<BigInteger> NumbersBigInParallel(BigInteger? staringAt = null, ushort? degreeOfParallelism = null)
-        {
-            var s = staringAt ?? BigInteger.One;
-            if (s >= ulong.MaxValue)
-            {
-                var testsBig = ValidPrimeTestsBig(s)
-                    .AsParallel().AsOrdered();
-
-                if (degreeOfParallelism.HasValue)
-                    testsBig = testsBig.WithDegreeOfParallelism(degreeOfParallelism.Value);
-
-                return testsBig.Where(v => Number.IsPrime(v));
-            }
-
-            var tests = ValidPrimeTests((ulong)s)
-                    .AsParallel().AsOrdered();
-
-            if (degreeOfParallelism.HasValue)
-                tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
-
-            return tests
-                .Where(v => Number.IsPrime(v))
-                .Select(v => (BigInteger)v)
-                .Concat(NumbersBigInParallel(ulong.MaxValue));
-        }
-
-        /// <summary>
-        /// Finds the next prime number after the number given.
-        /// </summary>
-        /// <param name="after">The excluded lower boundary to start with.</param>
-        /// <returns>The next prime after the number provided.</returns>
-        public static ulong Next(ulong after)
-        {
-            return Numbers(after + 1).First();
-        }
-
-        /// <summary>
-        /// Finds the next prime number after the number given.
-        /// </summary>
-        /// <param name="after">The excluded lower boundary to start with.</param>
-        /// <returns>The next prime after the number provided.</returns>
-        public static BigInteger Next(BigInteger after)
-        {
-            return NumbersBig(after + BigInteger.One).First();
-        }
-
-        /// <summary>
-        /// Finds the next prime number after the number given.
-        /// </summary>
-        /// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
-        /// <returns>The next prime after the number provided.</returns>
-        public static long Next(long after)
-        {
-            var sign = after < 0 ? -1 : 1;
-            after = Math.Abs(after);
-            return sign * Numbers(after + 1).First();
-        }
-
-        /// <summary>
-        /// Finds the next prime number after the number given.
-        /// </summary>
-        /// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
-        /// <returns>The next prime after the number provided.</returns>
-        /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
-        public static BigInteger Next(double after)
-        {
-            return Next((BigInteger)after);
-        }
-
-        /// <summary>
-        /// Finds the next prime number after the number given.
-        /// </summary>
-        /// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
-        /// <returns>The next prime after the number provided.</returns>
-        /// <exception cref="ArgumentException">Cannot coerce to a valid integer value.</exception>
-        public static BigInteger Next(float after)
-        {
-            return Next((BigInteger)after); // Any problematic precision error is negated by the conversion to a whole number.
-        }
-
-        /// <summary>
-        /// Finds the next prime number after the number given.
-        /// </summary>
-        /// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
-        /// <returns>The next prime after the number provided.</returns>
-        public static BigInteger Next(decimal after)
-        {
-            return Next((BigInteger)after);
-        }
-
+        public static readonly Optimized Numbers = new Optimized();
 
         /// <summary>
         /// Iterates the prime factors of the provided value.
@@ -511,27 +107,7 @@ namespace Open.Numeric.Primes
         /// <returns>An enumerable that contains the prime factors of the provided value starting with 0 or 1 for sign retention.</returns>
         public static IEnumerable<ulong> Factors(ulong value)
         {
-            if (value != 0UL)
-            {
-                yield return 1;
-                ulong last = 1;
-
-                // For larger numbers, a quick prime check can prevent large iterations.
-                if (!Number.IsPrime(value)) foreach (var p in Numbers())
-                    {
-                        ulong stop = value / last; // The list of possibilities shrinks for each test.
-                        if (p > stop) break; // Exceeded possibilities? 
-                        while ((value % p) == 0)
-                        {
-                            value /= p;
-                            yield return p;
-                            if (value == 1) yield break;
-                        }
-                        last = p;
-                    }
-            }
-
-            yield return value;
+            return Numbers.Factors(value);
         }
 
         /// <summary>
@@ -542,30 +118,7 @@ namespace Open.Numeric.Primes
         /// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
         public static IEnumerable<long> Factors(long value)
         {
-            if (value != 0L)
-            {
-                yield return value < 0L ? -1L : 1L;
-                if (value < 0L) value = Math.Abs(value);
-                if (value == 1L)
-                    yield break;
-
-                long last = 1L;
-
-                // For larger numbers, a quick prime check can prevent large iterations.
-                if (!Number.IsPrime(value)) foreach (var p in Numbers(2L))
-                    {
-                        long stop = value / last; // The list of possibilities shrinks for each test.
-                        if (p > stop) break; // Exceeded possibilities? 
-                        while ((value % p) == 0)
-                        {
-                            value /= p;
-                            yield return p;
-                            if (value == 1) yield break;
-                        }
-                        last = p;
-                    }
-            }
-            yield return value;
+            return Prime.Numbers.Factors(value);
         }
 
         /// <summary>
@@ -576,43 +129,7 @@ namespace Open.Numeric.Primes
         /// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
         public static IEnumerable<BigInteger> Factors(BigInteger value)
         {
-            if (value != BigInteger.Zero)
-            {
-                yield return value < BigInteger.Zero ? BigInteger.MinusOne : BigInteger.One;
-                value = BigInteger.Abs(value);
-                if (value == BigInteger.One)
-                    yield break;
-
-                if (value <= ulong.MaxValue)
-                {
-                    // Use more efficient ulong instead.
-                    foreach (var n in Factors((ulong)value).Skip(1))
-                        yield return n;
-                    yield break;
-                }
-                else
-                {
-                    BigInteger last = BigInteger.One;
-
-                    // For larger numbers, a quick prime check can prevent large iterations.
-                    if (!Number.IsPrime(value)) foreach (var p in NumbersBig())
-                        {
-                            BigInteger stop = value / last; // The list of possibilities shrinks for each test.
-                            if (p > stop) break; // Exceeded possibilities? 
-                            while ((value % p) == 0)
-                            {
-                                value /= p;
-                                yield return p;
-                                if (value == 1) yield break;
-                            }
-                            last = p;
-                        }
-                }
-
-
-            }
-
-            yield return value;
+            return Numbers.Big.Factors(value);
         }
 
         /// <summary>
@@ -860,7 +377,7 @@ namespace Open.Numeric.Primes
             /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
             public static ulong NextPrime(this ulong value)
             {
-                return Prime.Next(value);
+                return Prime.Numbers.Next(value);
             }
 
             /// <summary>
@@ -870,7 +387,7 @@ namespace Open.Numeric.Primes
             /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
             public static long NextPrime(this long value)
             {
-                return Prime.Next(value);
+                return Prime.Numbers.Next(value);
             }
 
             /// <summary>
@@ -880,7 +397,7 @@ namespace Open.Numeric.Primes
             /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
             public static BigInteger NextPrime(this float value)
             {
-                return Prime.Next(value);
+                return Prime.Numbers.Big.Next(value);
             }
 
             /// <summary>
@@ -890,7 +407,7 @@ namespace Open.Numeric.Primes
             /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
             public static BigInteger NextPrime(this double value)
             {
-                return Prime.Next(value);
+                return Prime.Numbers.Big.Next(value);
             }
 
             /// <summary>
@@ -900,7 +417,7 @@ namespace Open.Numeric.Primes
             /// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
             public static BigInteger NextPrime(this BigInteger value)
             {
-                return Prime.Next(value);
+                return Prime.Numbers.Big.Next(value);
             }
 
             /// <summary>

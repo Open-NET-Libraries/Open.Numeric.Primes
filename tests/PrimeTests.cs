@@ -7,96 +7,65 @@ namespace Open.Numeric.Primes.Tests
     [TestClass]
     public class PrimeNumbers
     {
-        static readonly ulong[] FIRST_PRIMES = new ulong[]
-        {
-                2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37
-        };
 
+
+
+        static void PrimesTest<T>()
+            where T : PrimalityBase<ulong>, new()
+        {
+            int i;
+
+            i = 0;
+            var instance = new T();
+            foreach (var p in instance.Take(TrialDivision.FirstKnown.Count))
+            {
+                Assert.AreEqual(TrialDivision.FirstKnown[i++], p, "Numbers did not match for " + typeof(T));
+            }
+
+            i = 0;
+            foreach (var p in instance.InParallel()
+                .Take(TrialDivision.FirstKnown.Count))
+            {
+                Assert.AreEqual(TrialDivision.FirstKnown[i++], p, "Numbers in parallel did not match for " + typeof(T));
+            }
+        }
+
+        static void PrimesTestBig<T>()
+            where T : PrimalityBase<BigInteger>, new()
+        {
+            int i;
+
+            i = 0;
+            var instance = new T();
+            foreach (var p in instance.Take(TrialDivision.FirstKnown.Count))
+            {
+                Assert.AreEqual((BigInteger)TrialDivision.FirstKnown[i++], p, "Numbers did not match for " + typeof(T));
+            }
+
+            i = 0;
+            foreach (var p in instance.InParallel()
+                .Take(TrialDivision.FirstKnown.Count))
+            {
+                Assert.AreEqual((BigInteger)TrialDivision.FirstKnown[i++], p, "Numbers in parallel did not match for " + typeof(T));
+            }
+        }
 
         [TestMethod]
         public void Primes_ULongByDivision()
         {
-            var i = 0;
-            foreach (var p in Prime.NumbersByDivision().Take(FIRST_PRIMES.Length))
-            {
-                Assert.AreEqual(FIRST_PRIMES[i++], p);
-            }
+            PrimesTest<TrialDivision>();
         }
 
         [TestMethod]
-        public void Primes_ULong()
+        public void Primes_ULongFromPolynomial()
         {
-
-            var i = 0;
-            foreach (var p in Prime.Numbers().Take(FIRST_PRIMES.Length))
-            {
-                Assert.AreEqual(FIRST_PRIMES[i++], p);
-            }
+            PrimesTest<Polynomial.U64>();
         }
 
         [TestMethod]
-        public void Primes_ULongParallel()
+        public void Primes_BigIntFromPolynomial()
         {
-
-            var i = 0;
-            foreach (var p in Prime
-                .NumbersInParallel()
-                .Take(FIRST_PRIMES.Length))
-            {
-                Assert.AreEqual(FIRST_PRIMES[i++], p);
-            }
-        }
-
-        [TestMethod]
-        public void Primes_Long()
-        {
-
-            var i = 0;
-            foreach (var p in Prime
-                .Numbers(2L)
-                .Take(FIRST_PRIMES.Length))
-            {
-                Assert.IsTrue((ulong)p == FIRST_PRIMES[i++]);
-            }
-        }
-
-        [TestMethod]
-        public void Primes_LongParallel()
-        {
-
-            var i = 0;
-            foreach (var p in Prime
-                .NumbersInParallel(2L)
-                .Take(FIRST_PRIMES.Length))
-            {
-                Assert.IsTrue((ulong)p == FIRST_PRIMES[i++]);
-            }
-        }
-
-        [TestMethod]
-        public void Primes_BigInt()
-        {
-
-            var i = 0;
-            foreach (var p in Prime
-                .NumbersBig()
-                .Take(FIRST_PRIMES.Length))
-            {
-                Assert.IsTrue(p == FIRST_PRIMES[i++]);
-            }
-        }
-
-        [TestMethod]
-        public void Primes_BigIntInParallel()
-        {
-
-            var i = 0;
-            foreach (var p in Prime
-                .NumbersBigInParallel()
-                .Take(FIRST_PRIMES.Length))
-            {
-                Assert.IsTrue(p == FIRST_PRIMES[i++]);
-            }
+            PrimesTestBig<Polynomial.BigInt>();
         }
 
         [TestMethod]
@@ -108,24 +77,6 @@ namespace Open.Numeric.Primes.Tests
                     Prime
                         .Factors(i)
                         .Aggregate(1UL,(p,c)=>p*c)
-                );
-                Assert.IsTrue(
-                    !Prime
-                        .Factors(i, true)
-                        .Any(p => !Number.IsPrime(p))
-                );
-            }
-        }
-
-        [TestMethod]
-        public void PrimeFactors_Long()
-        {
-            for (var i = 0L; i < 1000; i++)
-            {
-                Assert.AreEqual(i,
-                    Prime
-                        .Factors(i)
-                        .Aggregate(1L, (p, c) => p * c)
                 );
                 Assert.IsTrue(
                     !Prime
@@ -153,32 +104,6 @@ namespace Open.Numeric.Primes.Tests
             }
         }
 
-        const int SPEEDTEST_LIMIT = 300000;
-        [TestMethod]
-        public void PrimeSpeed_Ulong()
-        {
-            ulong result = 0;
-            foreach (var p in Prime
-                .Numbers(100000000UL)
-                .Take(SPEEDTEST_LIMIT))
-            {
-                result = p;
-            }
-            Assert.IsTrue(true);
-        }
-
-        [TestMethod]
-        public void PrimeSpeed_BigInt()
-        {
-            BigInteger result = 0;
-            foreach (var p in Prime
-                .NumbersBig()
-                .Take(SPEEDTEST_LIMIT))
-            {
-                result = p;
-            }
-            Assert.IsTrue(true);
-        }
 
     }
 }
