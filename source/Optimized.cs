@@ -1,36 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
+﻿using System.Numerics;
 
 namespace Open.Numeric.Primes
 {
-    public class Optimized : PrimalityU64Base
-    {
-        protected override bool IsPrimeInternal(ulong value)
-        {
-            if (value < 805000000) // Aproximate value where Polynomial prime detection stops being better than MillerRabin.
-                return Polynomial.IsPrimeInternal(value);
+	public class Optimized : PrimalityU64Base
+	{
+		protected override bool IsPrimeInternal(ulong value)
+		{
+			if (value < 805000000) // Aproximate value where Polynomial prime detection stops being better than MillerRabin.
+				return Polynomial.IsPrimeInternal(value);
 
-            return MillerRabin.IsPrime(value);
-        }
+			return MillerRabin.IsPrime(value);
+		}
 
-        public readonly BigInt Big = new BigInt();
+		public readonly BigInt Big = new BigInt();
 
-        public class BigInt : PrimalityBigIntBase
-        {
-            protected override bool IsPrimeInternal(BigInteger value)
-            {
-                if (value <= ulong.MaxValue)
-                    return MillerRabin.IsPrime((ulong)value);
+		public class BigInt : PrimalityBigIntBase
+		{
+			protected override bool IsPrimeInternal(BigInteger value)
+			{
+				if (value <= ulong.MaxValue)
+					return MillerRabin.IsPrime((ulong)value);
 
-                if (!MillerRabin.IsProbablePrime(value))
-                    return false; // false is the only deterministic result.
+				if (!MillerRabin.IsProbablePrime(value))
+					return false; // false is the only deterministic result.
 
-                // Lucas-Selfridge here? :(
+				// Lucas-Selfridge here? :(
 
-                return Polynomial.IsPrime(value, 6);
-            }
-        }
-    }
+				return Polynomial.IsPrime(value, 6);
+			}
+		}
+	}
 }
