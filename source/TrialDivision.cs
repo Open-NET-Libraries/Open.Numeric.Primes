@@ -33,7 +33,7 @@ namespace Open.Numeric.Primes
 
 		protected override bool IsPrimeInternal(ulong value)
 		{
-			ulong sqr = (ulong)Math.Sqrt(value);
+			var sqr = (ulong)Math.Sqrt(value);
 
 			foreach (var p in AllNumbers())
 			{
@@ -64,7 +64,7 @@ namespace Open.Numeric.Primes
 				do
 				{
 					var p = pN.Value;
-					ulong stop = n / last; // The list of possibilities shrinks for each test.
+					var stop = n / last; // The list of possibilities shrinks for each test.
 					if (p > stop)
 					{
 						known.AddLast(n);

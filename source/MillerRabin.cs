@@ -18,13 +18,13 @@ namespace Open.Numeric.Primes
 			else if (n < 341550071728321UL) ar = AR2;
 			else ar = AR3;
 
-			ulong d = n - 1;
-			int s = 0;
+			var d = n - 1;
+			var s = 0;
 			while ((d & 1) == 0) { d >>= 1; s++; }
-			for (int i = 0; i < ar.Length; i++)
+			for (var i = 0; i < ar.Length; i++)
 			{
-				ulong a = Math.Min(n - 2, ar[i]);
-				ulong now = Pow(a, d, n);
+				var a = Math.Min(n - 2, ar[i]);
+				var now = Pow(a, d, n);
 				if (now == 1) continue;
 				if (now == n - 1) continue;
 				int j;
@@ -84,8 +84,8 @@ namespace Open.Numeric.Primes
 			if (source < 2 || source % 2 == 0)
 				return false;
 
-			BigInteger d = source - 1;
-			int s = 0;
+			var d = source - 1;
+			var s = 0;
 
 			while (d % 2 == 0)
 			{
@@ -96,11 +96,11 @@ namespace Open.Numeric.Primes
 			// There is no built-in method for generating random BigInteger values.
 			// Instead, random BigIntegers are constructed from randomly generated
 			// byte arrays of the same length as the source.
-			RandomNumberGenerator rng = RandomNumberGenerator.Create();
-			byte[] bytes = new byte[source.ToByteArray().Length]; // .LongLength?
+			var rng = RandomNumberGenerator.Create();
+			var bytes = new byte[source.ToByteArray().Length]; // .LongLength?
 			BigInteger a;
 
-			for (int i = 0; i < certainty; i++)
+			for (var i = 0; i < certainty; i++)
 			{
 				do
 				{
@@ -109,11 +109,11 @@ namespace Open.Numeric.Primes
 				}
 				while (a < 2 || a >= source - 2);
 
-				BigInteger x = BigInteger.ModPow(a, d, source);
+				var x = BigInteger.ModPow(a, d, source);
 				if (x == 1 || x == source - 1)
 					continue;
 
-				for (int r = 1; r < s; r++)
+				for (var r = 1; r < s; r++)
 				{
 					x = BigInteger.ModPow(x, 2, source);
 					if (x == 1)

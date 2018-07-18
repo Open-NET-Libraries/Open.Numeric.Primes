@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 
@@ -37,9 +38,7 @@ namespace Open.Numeric.Primes
 		/// <param name="value">Value to verify.</param>
 		/// <returns>True if the provided value is a prime number</returns>
 		public static bool IsPrime(long value)
-		{
-			return IsPrime((ulong)Math.Abs(value));
-		}
+			=> IsPrime((ulong)Math.Abs(value));
 
 		/// <summary>
 		/// Validates if a number is prime.
@@ -48,14 +47,12 @@ namespace Open.Numeric.Primes
 		/// <returns>True if the provided value is a prime number</returns>
 		public static bool IsPrime(double value)
 		{
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
 			if (Math.Floor(value) != value)
 				return false;
 
 			value = Math.Abs(value);
-			if (value <= ulong.MaxValue)
-				return IsPrime((ulong)value);
-
-			return IsPrime((BigInteger)value);
+			return value <= ulong.MaxValue ? IsPrime((ulong)value) : IsPrime((BigInteger)value);
 		}
 
 		/// <summary>
@@ -69,10 +66,7 @@ namespace Open.Numeric.Primes
 				return false;
 
 			value = Math.Abs(value);
-			if (value <= ulong.MaxValue)
-				return IsPrime((ulong)value);
-
-			return IsPrime((BigInteger)value);
+			return value <= ulong.MaxValue ? IsPrime((ulong)value) : IsPrime((BigInteger)value);
 		}
 	}
 
@@ -93,7 +87,7 @@ namespace Open.Numeric.Primes
 			else if (float.IsNegativeInfinity(value))
 				return double.PositiveInfinity;
 			else
-				return double.Parse(value.ToString()); // Potential underlying precision error.  Seemingly whole numbers can be slightly off and not equate properly...
+				return double.Parse(value.ToString(CultureInfo.InvariantCulture)); // Potential underlying precision error.  Seemingly whole numbers can be slightly off and not equate properly...
 		}
 
 		public static readonly Optimized Numbers = new Optimized();
@@ -105,9 +99,7 @@ namespace Open.Numeric.Primes
 		/// <param name="value">The value to factorize.</param>
 		/// <returns>An enumerable that contains the prime factors of the provided value starting with 0 or 1 for sign retention.</returns>
 		public static IEnumerable<ulong> Factors(ulong value)
-		{
-			return Numbers.Factors(value);
-		}
+			=> Numbers.Factors(value);
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -116,9 +108,8 @@ namespace Open.Numeric.Primes
 		/// <param name="value">The value to factorize.</param>
 		/// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
 		public static IEnumerable<long> Factors(long value)
-		{
-			return Prime.Numbers.Factors(value);
-		}
+			=> Numbers.Factors(value);
+
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -127,9 +118,7 @@ namespace Open.Numeric.Primes
 		/// <param name="value">Value to factorize.</param>
 		/// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
 		public static IEnumerable<BigInteger> Factors(BigInteger value)
-		{
-			return Numbers.Big.Factors(value);
-		}
+			=> Numbers.Big.Factors(value);
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -142,6 +131,7 @@ namespace Open.Numeric.Primes
 		/// </returns>
 		public static IEnumerable<dynamic> Factors(double value)
 		{
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
 			if (double.IsNaN(value) || value == 0)
 			{
 				yield return value;
@@ -150,9 +140,11 @@ namespace Open.Numeric.Primes
 			{
 				yield return value < 1 ? -1 : 1;
 				if (value < 0) value = Math.Abs(value);
+				// ReSharper disable once CompareOfFloatsByEqualityOperator
 				if (value == 1L)
 					yield break;
 
+				// ReSharper disable once CompareOfFloatsByEqualityOperator
 				if (value != Math.Floor(value) || double.IsInfinity(value))
 				{
 					yield return value;
@@ -164,13 +156,11 @@ namespace Open.Numeric.Primes
 						// Use more efficient ulong instead.
 						foreach (var n in Factors((ulong)value).Skip(1))
 							yield return n;
-						yield break;
 					}
 					else
 					{
 						foreach (var b in Factors((BigInteger)value).Skip(1))
 							yield return b;
-						yield break;
 					}
 				}
 			}
@@ -262,10 +252,7 @@ namespace Open.Numeric.Primes
 
 	}
 
-	/// <summary>
-	/// Importing this namespace will expose prime extensions for most numeric value types.
-	/// Or import Open.Numeric.Primes to access the static methods directly.
-	/// </summary>
+
 	namespace Extensions
 	{
 		public static class PrimeExtensions
@@ -424,6 +411,7 @@ namespace Open.Numeric.Primes
 			/// If omitOneAndValue==false, first multiple is always 0 or 1.
 			/// Else if the value is prime, then there will be no results.
 			/// </summary>
+			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<ulong> PrimeFactors(this ulong value, bool omitOneAndValue = false)
 			{
@@ -435,6 +423,7 @@ namespace Open.Numeric.Primes
 			/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
 			/// Else if the value is prime, then there will be no results.
 			/// </summary>
+			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<long> PrimeFactors(this long value, bool omitOneAndValue = false)
 			{
@@ -446,6 +435,7 @@ namespace Open.Numeric.Primes
 			/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
 			/// Else if the value is prime, then there will be no results.
 			/// </summary>
+			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<BigInteger> PrimeFactors(this BigInteger value, bool omitOneAndValue = false)
 			{
@@ -457,6 +447,7 @@ namespace Open.Numeric.Primes
 			/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
 			/// Else if the value is prime or not a whole number, then there will be no results.
 			/// </summary>
+			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<dynamic> PrimeFactors(this double value, bool omitOneAndValue = false)
 			{
@@ -468,6 +459,7 @@ namespace Open.Numeric.Primes
 			/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
 			/// Else if the value is prime or not a whole number, then there will be no results.
 			/// </summary>
+			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<dynamic> PrimeFactors(this float value, bool omitOneAndValue = false)
 			{

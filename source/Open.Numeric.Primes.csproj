@@ -21,8 +21,12 @@ Part of the "Open" set of libraries.</Description>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>True</Optimize>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Open.Collections" Version="2.2.0" />
+    <PackageReference Include="Open.Collections" Version="2.3.0" />
   </ItemGroup>
 </Project>

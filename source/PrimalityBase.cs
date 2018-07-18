@@ -172,7 +172,7 @@ namespace Open.Numeric.Primes
 				{
 					foreach (var p in this)
 					{
-						ulong stop = value / last; // The list of possibilities shrinks for each test.
+						var stop = value / last; // The list of possibilities shrinks for each test.
 						if (p > stop) break; // Exceeded possibilities? 
 						while ((value % p) == 0)
 						{
@@ -203,14 +203,14 @@ namespace Open.Numeric.Primes
 				if (value == 1L)
 					yield break;
 
-				long last = 1L;
+				var last = 1L;
 
 				// For larger numbers, a quick prime check can prevent large iterations.
 				if (IsFactorable((ulong)value))
 				{
 					foreach (var p in StartingAt(2L))
 					{
-						long stop = value / last; // The list of possibilities shrinks for each test.
+						var stop = value / last; // The list of possibilities shrinks for each test.
 						if (p > stop) break; // Exceeded possibilities? 
 						while ((value % p) == 0)
 						{
@@ -358,7 +358,7 @@ namespace Open.Numeric.Primes
 
 			return tests
 				.Where(v => IsPrime(v))
-				.Select(v => (BigInteger)v)
+				.Select(v => v)
 				.Concat(InParallel(ulong.MaxValue));
 		}
 
@@ -388,12 +388,12 @@ namespace Open.Numeric.Primes
 				if (value == BigInteger.One)
 					yield break;
 
-				BigInteger last = BigInteger.One;
+				var last = BigInteger.One;
 
 				// For larger numbers, a quick prime check can prevent large iterations.
 				if (IsFactorable(value)) foreach (var p in this)
 					{
-						BigInteger stop = value / last; // The list of possibilities shrinks for each test.
+						var stop = value / last; // The list of possibilities shrinks for each test.
 						if (p > stop) break; // Exceeded possibilities? 
 						while ((value % p) == 0)
 						{
