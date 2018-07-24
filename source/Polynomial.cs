@@ -25,16 +25,21 @@ namespace Open.Numeric.Primes
 			return true;
 		}
 
+		/// <summary>
+		/// Returns true if the value provided is prime.
+		/// </summary>
+		/// <param name="value">The value to validate.</param>
+		/// <returns>True if the value provided is prime</returns>
 		public static bool IsPrime(in ulong value)
 		{
 			switch (value)
 			{
 				// 0 and 1 are not prime numbers
-				case 0:
-				case 1:
+				case 0UL:
+				case 1UL:
 					return false;
-				case 2:
-				case 3:
+				case 2UL:
+				case 3UL:
 					return true;
 
 				default:
@@ -46,6 +51,11 @@ namespace Open.Numeric.Primes
 			}
 		}
 
+		/// <summary>
+		/// Returns true if the value provided is prime.
+		/// </summary>
+		/// <param name="value">The value to validate.</param>
+		/// <returns>True if the value provided is prime</returns>
 		public static bool IsBigPrime(in BigInteger value)
 		{
 			if (value.IsZero)
@@ -56,7 +66,7 @@ namespace Open.Numeric.Primes
 				if (v == BIG.TWO || v == BIG.THREE)
 					return true;
 
-				if (v.IsOne || v.IsEven)
+				if (v.IsEven)
 					return false;
 
 				if (v <= ulong.MaxValue)
@@ -67,8 +77,8 @@ namespace Open.Numeric.Primes
 			}
 
 			return value.Sign == -1
-				? primeCheck(BigInteger.Abs(value))
-				: primeCheck(in value);
+				? value != BigInteger.MinusOne && primeCheck(BigInteger.Abs(value))
+				: !value.IsOne && primeCheck(in value);
 		}
 
 		internal static bool IsPrime(in BigInteger value, BigInteger divisor)

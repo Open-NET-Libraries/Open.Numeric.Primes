@@ -17,10 +17,24 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="value">Value to verify.</param>
 		/// <returns>True if the provided value is a prime number</returns>
+		public static bool IsPrime(in ulong value)
+			=> Prime.Numbers.IsPrime(in value);
+
+		/// <summary>
+		/// Validates if a number is prime.
+		/// </summary>
+		/// <param name="value">Value to verify.</param>
+		/// <returns>True if the provided value is a prime number</returns>
 		public static bool IsPrime(ulong value)
-		{
-			return Prime.Numbers.IsPrime(value);
-		}
+			=> Prime.Numbers.IsPrime(in value);
+
+		/// <summary>
+		/// Validates if a number is prime.
+		/// </summary>
+		/// <param name="value">Value to verify.</param>
+		/// <returns>True if the provided value is a prime number</returns>
+		public static bool IsPrime(in BigInteger value)
+			=> Prime.Numbers.Big.IsPrime(in value);
 
 		/// <summary>
 		/// Validates if a number is prime.
@@ -28,9 +42,7 @@ namespace Open.Numeric.Primes
 		/// <param name="value">Value to verify.</param>
 		/// <returns>True if the provided value is a prime number</returns>
 		public static bool IsPrime(BigInteger value)
-		{
-			return Prime.Numbers.Big.IsPrime(value);
-		}
+			=> Prime.Numbers.Big.IsPrime(in value);
 
 		/// <summary>
 		/// Validates if a number is prime.
@@ -38,7 +50,7 @@ namespace Open.Numeric.Primes
 		/// <param name="value">Value to verify.</param>
 		/// <returns>True if the provided value is a prime number</returns>
 		public static bool IsPrime(long value)
-			=> IsPrime((ulong)Math.Abs(value));
+			=> Prime.Numbers.IsPrime(value);
 
 		/// <summary>
 		/// Validates if a number is prime.
@@ -60,13 +72,28 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="value">Value to verify.</param>
 		/// <returns>True if the provided value is a prime number</returns>
-		public static bool IsPrime(decimal value)
+		public static bool IsPrime(in decimal value)
 		{
+			switch (value)
+			{
+				case decimal.Zero:
+				case decimal.One:
+				case decimal.MinusOne:
+					return false;
+			}
+
 			if (Math.Floor(value) != value)
 				return false;
 
-			value = Math.Abs(value);
-			return value <= ulong.MaxValue ? IsPrime((ulong)value) : IsPrime((BigInteger)value);
+			if (value > 0)
+				return value <= ulong.MaxValue
+					? IsPrime((ulong)value)
+					: IsPrime((BigInteger)value);
+
+			var v = Math.Abs(value);
+			return v <= ulong.MaxValue
+				? IsPrime((ulong)v)
+				: IsPrime((BigInteger)v);
 		}
 	}
 
@@ -82,12 +109,13 @@ namespace Open.Numeric.Primes
 			// Need to propertly convert a float to double to avoid potential precision error.
 			if (float.IsNaN(value))
 				return double.NaN;
-			else if (float.IsPositiveInfinity(value))
+
+			if (float.IsPositiveInfinity(value))
 				return double.PositiveInfinity;
-			else if (float.IsNegativeInfinity(value))
-				return double.PositiveInfinity;
-			else
-				return double.Parse(value.ToString(CultureInfo.InvariantCulture)); // Potential underlying precision error.  Seemingly whole numbers can be slightly off and not equate properly...
+
+			return float.IsNegativeInfinity(value)
+				? double.NegativeInfinity
+				: double.Parse(value.ToString(CultureInfo.InvariantCulture));
 		}
 
 		public static readonly Optimized Numbers = new Optimized();
@@ -141,7 +169,7 @@ namespace Open.Numeric.Primes
 				yield return value < 1 ? -1 : 1;
 				if (value < 0) value = Math.Abs(value);
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
-				if (value == 1L)
+				if (value == 1d)
 					yield break;
 
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -176,9 +204,7 @@ namespace Open.Numeric.Primes
 		/// Value types may differ depending on the magnitude of the provided value.
 		/// </returns>
 		public static IEnumerable<dynamic> Factors(float value)
-		{
-			return Factors(ToDouble(value));
-		}
+			=> Factors(ToDouble(value));
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -188,11 +214,9 @@ namespace Open.Numeric.Primes
 		/// <param name="value">The value to factorize.</param>
 		/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 		public static IEnumerable<dynamic> Factors(double value, bool omitOneAndValue)
-		{
-			return omitOneAndValue
+			=> omitOneAndValue
 				? Factors(value).Skip(1).TakeWhile(v => v != value)
 				: Factors(value);
-		}
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -202,11 +226,9 @@ namespace Open.Numeric.Primes
 		/// <param name="value">The value to factorize.</param>
 		/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned..</param>
 		public static IEnumerable<dynamic> Factors(float value, bool omitOneAndValue)
-		{
-			return omitOneAndValue
+			=> omitOneAndValue
 				? Factors(value).Skip(1).TakeWhile(v => v != value)
 				: Factors(value);
-		}
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -216,11 +238,9 @@ namespace Open.Numeric.Primes
 		/// <param name="value">The value to factorize.</param>
 		/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 		public static IEnumerable<ulong> Factors(ulong value, bool omitOneAndValue)
-		{
-			return omitOneAndValue
+			=> omitOneAndValue
 				? Factors(value).Skip(1).TakeWhile(v => v != value)
 				: Factors(value);
-		}
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -230,11 +250,9 @@ namespace Open.Numeric.Primes
 		/// <param name="value">The value to factorize.</param>
 		/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 		public static IEnumerable<long> Factors(long value, bool omitOneAndValue)
-		{
-			return omitOneAndValue
+			=> omitOneAndValue
 				? Factors(value).Skip(1).TakeWhile(v => v != value)
 				: Factors(value);
-		}
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -244,11 +262,9 @@ namespace Open.Numeric.Primes
 		/// <param name="value">The value to factorize.</param>
 		/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 		public static IEnumerable<BigInteger> Factors(BigInteger value, bool omitOneAndValue)
-		{
-			return omitOneAndValue
+			=> omitOneAndValue
 				? Factors(value).Skip(1).TakeWhile(v => v != value)
 				: Factors(value);
-		}
 
 	}
 
@@ -262,99 +278,79 @@ namespace Open.Numeric.Primes
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this ulong value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(in value);
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this long value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(value);
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this int value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(value);
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this uint value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(value);
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this short value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(value);
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this ushort value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(value);
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this sbyte value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(value);
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this byte value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(value);
+
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this double value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(value);
+
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this decimal value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(in value);
 
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this BigInteger value)
-			{
-				return Number.IsPrime(value);
-			}
+				=> Number.IsPrime(in value);
 
 			/// <summary>
 			/// Finds the next prime number after the number given.
@@ -362,29 +358,21 @@ namespace Open.Numeric.Primes
 			/// <returns>The next prime after the number provided.</returns>
 			/// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
 			public static ulong NextPrime(this ulong value)
-			{
-				return Prime.Numbers.Next(value);
-			}
+				=> Prime.Numbers.Next(in value);
 
 			/// <summary>
 			/// Finds the next prime number after the number given.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.
 			/// </summary>
 			/// <returns>The next prime after the number provided.</returns>
-			/// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
 			public static long NextPrime(this long value)
-			{
-				return Prime.Numbers.Next(value);
-			}
+				=> Prime.Numbers.Next(in value);
 
 			/// <summary>
 			/// Finds the next prime number after the number given.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.
 			/// </summary>
 			/// <returns>The next prime after the number provided.</returns>
-			/// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
 			public static BigInteger NextPrime(this float value)
-			{
-				return Prime.Numbers.Big.Next(value);
-			}
+				=> Prime.Numbers.Big.Next(value);
 
 			/// <summary>
 			/// Finds the next prime number after the number given.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.
@@ -392,9 +380,7 @@ namespace Open.Numeric.Primes
 			/// <returns>The next prime after the number provided.</returns>
 			/// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
 			public static BigInteger NextPrime(this double value)
-			{
-				return Prime.Numbers.Big.Next(value);
-			}
+				=> Prime.Numbers.Big.Next(value);
 
 			/// <summary>
 			/// Finds the next prime number after the number given.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.
@@ -402,9 +388,7 @@ namespace Open.Numeric.Primes
 			/// <returns>The next prime after the number provided.</returns>
 			/// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
 			public static BigInteger NextPrime(this BigInteger value)
-			{
-				return Prime.Numbers.Big.Next(value);
-			}
+				=> Prime.Numbers.Big.Next(in value);
 
 			/// <summary>
 			/// Iterates the prime factors of the provided value.
@@ -414,9 +398,7 @@ namespace Open.Numeric.Primes
 			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<ulong> PrimeFactors(this ulong value, bool omitOneAndValue = false)
-			{
-				return Prime.Factors(value, omitOneAndValue);
-			}
+				=> Prime.Factors(value, omitOneAndValue);
 
 			/// <summary>
 			/// Iterates the prime factors of the provided value.
@@ -426,9 +408,7 @@ namespace Open.Numeric.Primes
 			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<long> PrimeFactors(this long value, bool omitOneAndValue = false)
-			{
-				return Prime.Factors(value, omitOneAndValue);
-			}
+				=> Prime.Factors(value, omitOneAndValue);
 
 			/// <summary>
 			/// Iterates the prime factors of the provided value.
@@ -438,9 +418,8 @@ namespace Open.Numeric.Primes
 			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<BigInteger> PrimeFactors(this BigInteger value, bool omitOneAndValue = false)
-			{
-				return Prime.Factors(value, omitOneAndValue);
-			}
+				=> Prime.Factors(value, omitOneAndValue);
+
 
 			/// <summary>
 			/// Iterates the prime factors of the provided value.
@@ -450,9 +429,8 @@ namespace Open.Numeric.Primes
 			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<dynamic> PrimeFactors(this double value, bool omitOneAndValue = false)
-			{
-				return Prime.Factors(value, omitOneAndValue);
-			}
+				=> Prime.Factors(value, omitOneAndValue);
+
 
 			/// <summary>
 			/// Iterates the prime factors of the provided value.
@@ -462,9 +440,8 @@ namespace Open.Numeric.Primes
 			/// <param name="value">The value to factor.</param>
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<dynamic> PrimeFactors(this float value, bool omitOneAndValue = false)
-			{
-				return Prime.Factors(value, omitOneAndValue);
-			}
+				=> Prime.Factors(value, omitOneAndValue);
+
 		}
 	}
 }

@@ -8,9 +8,6 @@ namespace Open.Numeric.Primes.Tests
 	[TestClass]
 	public class PrimeNumbers
 	{
-
-
-
 		static void PrimesTest<T>()
 			where T : PrimalityBase<ulong>, new()
 		{
@@ -90,7 +87,9 @@ namespace Open.Numeric.Primes.Tests
 						.Aggregate(1UL, (p, c) => p * c)
 				);
 				Assert.IsTrue(
-					Prime.Factors(i, true).All(Number.IsPrime)
+					Prime
+						.Factors(i, true)
+						.All(Number.IsPrime)
 				);
 			}
 		}
@@ -106,7 +105,9 @@ namespace Open.Numeric.Primes.Tests
 						.Aggregate(BigInteger.One, (p, c) => p * c)
 				);
 				Assert.IsTrue(
-					Prime.Factors(i, true).All(Number.IsPrime)
+					Prime
+						.Factors(i, true)
+						.All(Prime.Numbers.Big.IsPrime)
 				);
 			}
 		}

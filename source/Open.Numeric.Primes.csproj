@@ -14,10 +14,11 @@ Part of the "Open" set of libraries.</Description>
     <RepositoryType>git</RepositoryType>
     <PackageTags>prime-numbers, primes, prime-factorization, prime-detection, prime-discovery</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.4.1</Version>
-    <AssemblyVersion>1.4.1.0</AssemblyVersion>
-    <FileVersion>1.4.1.0</FileVersion>
-    <PackageReleaseNotes>Updated to latest C# and implemented 'in' reference for BigIntegers and subsequent classes.</PackageReleaseNotes>
+    <Version>1.4.2</Version>
+    <AssemblyVersion>1.4.2.0</AssemblyVersion>
+    <FileVersion>1.4.2.0</FileVersion>
+    <PackageReleaseNotes>Updated method signatures for 'in' and documentation.
+</PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>True</Optimize>

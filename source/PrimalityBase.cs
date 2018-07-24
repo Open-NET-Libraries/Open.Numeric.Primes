@@ -14,7 +14,19 @@ namespace Open.Numeric.Primes
 
 		protected abstract IEnumerable<T> ValidPrimeTests(T startingAt);
 
+		/// <summary>
+		/// Returns true if the value provided is prime.
+		/// </summary>
+		/// <param name="value">The value to validate.</param>
+		/// <returns>True if the value provided is prime</returns>
 		public abstract bool IsPrime(in T value);
+
+		/// <summary>
+		/// Returns true if the value provided is prime.
+		/// </summary>
+		/// <param name="value">The value to validate.</param>
+		/// <returns>True if the value provided is prime</returns>
+		public bool IsPrime(T value) => IsPrime(in value);
 
 		/// <summary>
 		/// Returns an enumerable that will iterate every prime starting at the starting value.
@@ -22,11 +34,13 @@ namespace Open.Numeric.Primes
 		/// <param name="value">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
 		/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
 		public virtual IEnumerable<T> StartingAt(T value)
-		{
-			return ValidPrimeTests(value)
-				.Where(v => IsPrime(in v));
-		}
+			=> ValidPrimeTests(value)
+				.Where(IsPrime);
 
+		/// <summary>
+		/// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
+		/// So the first entry is always {Key=1, Value=2}.
+		/// </summary>
 		public abstract IEnumerable<KeyValuePair<T, T>> Indexed();
 
 		/// <summary>
@@ -34,15 +48,26 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
 		/// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-		/// <returns></returns>
+		/// <returns>An ordered parallel enumerable of primes.</returns>
 		// ReSharper disable once UnusedMemberInSuper.Global
 		public abstract ParallelQuery<T> InParallel(in T staringAt, ushort? degreeOfParallelism = null);
 
+		/// <summary>
+		/// Returns a parallel enumerable that will iterate every prime starting at the starting value.
+		/// </summary>
+		/// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
+		/// <returns>An ordered parallel enumerable of primes.</returns>
 		public abstract ParallelQuery<T> InParallel(ushort? degreeOfParallelism = null);
 
 		protected virtual bool IsFactorable(in T value)
 			=> !IsPrime(in value);
 
+		/// <summary>
+		/// Iterates the prime factors of the provided value.
+		/// First multiple is always 0, 1 or -1.
+		/// </summary>
+		/// <param name="value">The value to factorize.</param>
+		/// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
 		public abstract IEnumerable<T> Factors(T value);
 
 		/// <summary>
@@ -53,14 +78,18 @@ namespace Open.Numeric.Primes
 		/// <param name="value">The value to factorize.</param>
 		/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 		public IEnumerable<T> Factors(T value, bool omitOneAndValue)
-		{
-			return omitOneAndValue
+			=> omitOneAndValue
 				? Factors(value).Skip(1).TakeWhile(v => !value.Equals(v))
 				: Factors(value);
-		}
 
+		/// <summary>
+		/// Finds the next prime number after the number given.
+		/// </summary>
+		/// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
+		/// <returns>The next prime after the number provided.</returns>s
 		public abstract T Next(in T after);
 
+		/// <inheritdoc />
 		public abstract IEnumerator<T> GetEnumerator();
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -87,14 +116,9 @@ namespace Open.Numeric.Primes
 				yield return n;
 		}
 
-		/// <summary>
-		/// Returns an enumerator that will iterate every prime starting at the starting value.
-		/// </summary>
-		/// <returns>An enumerator that will iterate every prime starting at the starting value</returns>
+		/// <inheritdoc />
 		public override IEnumerator<ulong> GetEnumerator()
-		{
-			return StartingAt(2UL).GetEnumerator();
-		}
+			=> StartingAt(2UL).GetEnumerator();
 
 		/// <summary>
 		/// Returns an enumerable that will iterate every prime starting at the starting value.
@@ -118,10 +142,7 @@ namespace Open.Numeric.Primes
 				.Cast<long>();
 		}
 
-		/// <summary>
-		/// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
-		/// So the first entry is always {Key=1, Value=2}.
-		/// </summary>
+		/// <inheritdoc />
 		public override IEnumerable<KeyValuePair<ulong, ulong>> Indexed()
 		{
 			ulong count = 0L;
@@ -132,12 +153,7 @@ namespace Open.Numeric.Primes
 			}
 		}
 
-		/// <summary>
-		/// Returns a parallel enumerable that will iterate every prime starting at the starting value.
-		/// </summary>
-		/// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-		/// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public override ParallelQuery<ulong> InParallel(in ulong staringAt, ushort? degreeOfParallelism = null)
 		{
 			var tests = ValidPrimeTests(staringAt)
@@ -146,25 +162,14 @@ namespace Open.Numeric.Primes
 			if (degreeOfParallelism.HasValue)
 				tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
 
-			return tests.Where(v => IsPrime(in v));
+			return tests.Where(IsPrime);
 		}
 
-		/// <summary>
-		/// Returns a parallel enumerable that will iterate every prime.
-		/// </summary>
-		/// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public override ParallelQuery<ulong> InParallel(ushort? degreeOfParallelism = null)
-		{
-			return InParallel(2UL, degreeOfParallelism);
-		}
+			=> InParallel(2UL, degreeOfParallelism);
 
-		/// <summary>
-		/// Iterates the prime factors of the provided value.
-		/// First multiple is always 0 or 1 (and for other overloads can be -1).
-		/// </summary>
-		/// <param name="value">The value to factorize.</param>
-		/// <returns>An enumerable that contains the prime factors of the provided value starting with 0 or 1 for sign retention.</returns>
+		/// <inheritdoc />
 		public override IEnumerable<ulong> Factors(ulong value)
 		{
 			if (value != 0UL)
@@ -231,15 +236,9 @@ namespace Open.Numeric.Primes
 			yield return value;
 		}
 
-		/// <summary>
-		/// Finds the next prime number after the number given.
-		/// </summary>
-		/// <param name="after">The excluded lower boundary to start with.</param>
-		/// <returns>The next prime after the number provided.</returns>
+		/// <inheritdoc />
 		public override ulong Next(in ulong after)
-		{
-			return StartingAt(after + 1).First();
-		}
+			=> StartingAt(after + 1).First();
 
 		/// <summary>
 		/// Finds the next prime number after the number given.
@@ -247,10 +246,9 @@ namespace Open.Numeric.Primes
 		/// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
 		/// <returns>The next prime after the number provided.</returns>
 		public long Next(in long after)
-		{
-			return StartingAt(after + 1).First();
-		}
+			=> StartingAt(after + 1).First();
 
+		/// <inheritdoc />
 		public sealed override bool IsPrime(in ulong value)
 		{
 			switch (value)
@@ -268,14 +266,17 @@ namespace Open.Numeric.Primes
 					if (value % 2UL == 0 || value % 3UL == 0)
 						return false;
 
-					return IsPrimeInternal(value);
+					return IsPrimeInternal(in value);
 			}
 		}
 
-		public bool IsPrime(in long value)
-		{
-			return IsPrime((ulong)Math.Abs(value));
-		}
+		/// <summary>
+		/// Returns true if the value provided is prime.
+		/// </summary>
+		/// <param name="value">The value to validate.</param>
+		/// <returns>True if the value provided is prime</returns>
+		public bool IsPrime(long value)
+			=> IsPrime((ulong)Math.Abs(value));
 
 		/// <summary>
 		/// Should only check for primes that aren't divisible by 2 or 3.
@@ -310,20 +311,14 @@ namespace Open.Numeric.Primes
 			// ReSharper disable once IteratorNeverReturns
 		}
 
-		/// <summary>
-		/// Returns an enumerable that will iterate every prime starting at the starting value.
-		/// </summary>
-		/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
+		/// <inheritdoc />
 		public override IEnumerator<BigInteger> GetEnumerator()
 			=> StartingAt(BigInteger.One).GetEnumerator();
 
 		protected IEnumerable<BigInteger> ValidPrimeTests()
 			=> ValidPrimeTests(BigInteger.One);
 
-		/// <summary>
-		/// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
-		/// So the first entry is always {Key=1, Value=2}.
-		/// </summary>
+		/// <inheritdoc />
 		public override IEnumerable<KeyValuePair<BigInteger, BigInteger>> Indexed()
 		{
 			var count = BigInteger.Zero;
@@ -334,12 +329,7 @@ namespace Open.Numeric.Primes
 			}
 		}
 
-		/// <summary>
-		/// Returns a parallel enumerable that will iterate every prime starting at the starting value.
-		/// </summary>
-		/// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-		/// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public override ParallelQuery<BigInteger> InParallel(in BigInteger staringAt, ushort? degreeOfParallelism = null)
 		{
 			if (staringAt >= ulong.MaxValue)
@@ -350,7 +340,7 @@ namespace Open.Numeric.Primes
 				if (degreeOfParallelism.HasValue)
 					testsBig = testsBig.WithDegreeOfParallelism(degreeOfParallelism.Value);
 
-				return testsBig.Where(v => IsPrime(in v));
+				return testsBig.Where(IsPrime);
 			}
 
 			var tests = ValidPrimeTests((ulong)staringAt)
@@ -360,38 +350,29 @@ namespace Open.Numeric.Primes
 				tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
 
 			return tests
-				.Where(v => IsPrime(in v))
+				.Where(IsPrime)
 				.Select(v => v)
 				.Concat(InParallel(ulong.MaxValue));
 		}
 
-		/// <summary>
-		/// Returns a parallel enumerable that will iterate every prime.
-		/// </summary>
-		/// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public override ParallelQuery<BigInteger> InParallel(ushort? degreeOfParallelism = null)
-			=> InParallel(BIG.TWO, degreeOfParallelism);
+			=> InParallel(in BIG.TWO, degreeOfParallelism);
 
 
-		/// <summary>
-		/// Iterates the prime factors of the provided value.
-		/// First multiple is always 0, 1 or -1.
-		/// </summary>
-		/// <param name="value">Value to factorize.</param>
-		/// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
+		/// <inheritdoc />
 		public override IEnumerable<BigInteger> Factors(BigInteger value)
 		{
 			if (value != BigInteger.Zero)
 			{
-				yield return value < BigInteger.Zero
+				yield return value.Sign == -1
 					? BigInteger.MinusOne
 					: BigInteger.One;
 
-				value = BigInteger.Abs(value);
-				if (value == BigInteger.One)
+				if (value.IsOne || value == BigInteger.MinusOne)
 					yield break;
 
+				value = BigInteger.Abs(value);
 				var last = BigInteger.One;
 
 				// For larger numbers, a quick prime check can prevent large iterations.
@@ -405,7 +386,7 @@ namespace Open.Numeric.Primes
 						{
 							value /= p;
 							yield return p;
-							if (value == BigInteger.One) yield break;
+							if (value.IsOne) yield break;
 						}
 						last = p;
 					}
@@ -415,11 +396,7 @@ namespace Open.Numeric.Primes
 			yield return value;
 		}
 
-		/// <summary>
-		/// Finds the next prime number after the number given.
-		/// </summary>
-		/// <param name="after">The excluded lower boundary to start with.</param>
-		/// <returns>The next prime after the number provided.</returns>
+		/// <inheritdoc />
 		public override BigInteger Next(in BigInteger after)
 			=> StartingAt(after + BigInteger.One).First();
 
@@ -439,6 +416,7 @@ namespace Open.Numeric.Primes
 		public BigInteger Next(double after)
 			=> Next((BigInteger)after);
 
+		/// <inheritdoc />
 		public sealed override bool IsPrime(in BigInteger value)
 		{
 			if (value.IsZero)
@@ -449,7 +427,7 @@ namespace Open.Numeric.Primes
 				if (v == BIG.TWO || v == BIG.THREE)
 					return true;
 
-				if (v.IsOne || v.IsEven)
+				if (v.IsEven)
 					return false;
 
 				if (v <= ulong.MaxValue)
@@ -459,8 +437,8 @@ namespace Open.Numeric.Primes
 			}
 
 			return value.Sign == -1
-				? primeCheck(BigInteger.Abs(value))
-				: primeCheck(in value);
+				? value != BigInteger.MinusOne && primeCheck(BigInteger.Abs(value))
+				: !value.IsOne && primeCheck(in value);
 		}
 
 		protected abstract bool IsPrimeInternal(in BigInteger value);
