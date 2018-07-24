@@ -6,14 +6,14 @@ namespace Open.Numeric.Primes
 {
 	public static class MillerRabin
 	{
-		static readonly ulong[] AR1 = new ulong[] { 2, 7, 61 };
-		static readonly ulong[] AR2 = new ulong[] { 2, 3, 5, 7, 11, 13, 17 };
-		static readonly ulong[] AR3 = new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23 };
+		static readonly ulong[] AR1 = { 2, 7, 61 };
+		static readonly ulong[] AR2 = { 2, 3, 5, 7, 11, 13, 17 };
+		static readonly ulong[] AR3 = { 2, 3, 5, 7, 11, 13, 17, 19, 23 };
 
 		/* Based on: https://stackoverflow.com/questions/4236673/sample-code-for-fast-primality-testing-in-c-sharp#4236870 */
-		public static bool IsPrime(ulong n)
+		public static bool IsPrime(in ulong n)
 		{
-			ulong[] ar;
+			ReadOnlySpan<ulong> ar;
 			if (n < 4759123141UL) ar = AR1;
 			else if (n < 341550071728321UL) ar = AR2;
 			else ar = AR3;
@@ -21,16 +21,17 @@ namespace Open.Numeric.Primes
 			var d = n - 1;
 			var s = 0;
 			while ((d & 1) == 0) { d >>= 1; s++; }
+			// ReSharper disable once ForCanBeConvertedToForeach
 			for (var i = 0; i < ar.Length; i++)
 			{
 				var a = Math.Min(n - 2, ar[i]);
-				var now = Pow(a, d, n);
+				var now = Pow(a, d, in n);
 				if (now == 1) continue;
 				if (now == n - 1) continue;
 				int j;
 				for (j = 1; j < s; j++)
 				{
-					now = Mul(now, now, n);
+					now = Mul(in now, in now, in n);
 					if (now == n - 1) break;
 				}
 				if (j == s) return false;
@@ -38,7 +39,7 @@ namespace Open.Numeric.Primes
 			return true;
 		}
 
-		static ulong Mul(ulong a, ulong b, ulong mod)
+		static ulong Mul(in ulong a, in ulong b, in ulong mod)
 		{
 			int i;
 			ulong now = 0;
@@ -53,7 +54,8 @@ namespace Open.Numeric.Primes
 			return now;
 		}
 
-		static BigInteger Mul(BigInteger a, BigInteger b, BigInteger mod)
+		// ReSharper disable once UnusedMember.Local
+		static BigInteger Mul(in BigInteger a, in BigInteger b, in BigInteger mod)
 		{
 			int i;
 			BigInteger now = 0;
@@ -68,16 +70,19 @@ namespace Open.Numeric.Primes
 			return now;
 		}
 
-		static ulong Pow(ulong a, ulong p, ulong mod)
+		static ulong Pow(ulong a, ulong p, in ulong mod)
 		{
+			retry:
 			if (p == 0) return 1;
-			if (p % 2 == 0) return Pow(Mul(a, a, mod), p / 2, mod);
-			return Mul(Pow(a, p - 1, mod), a, mod);
+			if (p % 2 != 0) return Mul(Pow(a, p - 1, in mod), in a, in mod);
+			a = Mul(in a, in a, in mod);
+			p = p / 2;
+			goto retry;
 		}
 
 
 		/* Based on: https://rosettacode.org/wiki/Miller%E2%80%93Rabin_primality_test#C.23 */
-		public static bool IsProbablePrime(this BigInteger source, int certainty = 10)
+		public static bool IsProbablePrime(in BigInteger source, int certainty = 10)
 		{
 			if (source == 2 || source == 3)
 				return true;
@@ -98,10 +103,10 @@ namespace Open.Numeric.Primes
 			// byte arrays of the same length as the source.
 			var rng = RandomNumberGenerator.Create();
 			var bytes = new byte[source.ToByteArray().Length]; // .LongLength?
-			BigInteger a;
 
 			for (var i = 0; i < certainty; i++)
 			{
+				BigInteger a;
 				do
 				{
 					rng.GetBytes(bytes);
@@ -132,10 +137,14 @@ namespace Open.Numeric.Primes
 
 		public class U64 : PrimalityU64Base
 		{
-			protected override bool IsPrimeInternal(ulong value)
-			{
-				return MillerRabin.IsPrime(value);
-			}
+			protected override bool IsPrimeInternal(in ulong value)
+				=> MillerRabin.IsPrime(in value);
+		}
+
+		public class BigInt : PrimalityBigIntBase
+		{
+			protected override bool IsPrimeInternal(in BigInteger value)
+				=> IsProbablePrime(in value);
 		}
 	}
 }

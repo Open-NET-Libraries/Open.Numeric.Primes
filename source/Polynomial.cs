@@ -6,7 +6,7 @@ namespace Open.Numeric.Primes
 	{
 		const ulong MAX_ULONG_DIVISOR = 25043747693UL;
 
-		internal static bool IsPrimeInternal(ulong value)
+		internal static bool IsPrimeInternal(in ulong value)
 		{
 			ulong divisor = 6;
 			while (divisor * divisor - 2 * divisor + 1 <= value)
@@ -25,7 +25,7 @@ namespace Open.Numeric.Primes
 			return true;
 		}
 
-		public static bool IsPrime(ulong value)
+		public static bool IsPrime(in ulong value)
 		{
 			switch (value)
 			{
@@ -42,27 +42,36 @@ namespace Open.Numeric.Primes
 					if (value % 2 == 0 || value % 3 == 0)
 						return false;
 
-					return IsPrimeInternal(value);
+					return IsPrimeInternal(in value);
 			}
 		}
 
-		public static bool IsPrime(BigInteger value)
+		public static bool IsBigPrime(in BigInteger value)
 		{
-			if (value.IsZero || value.IsOne)
-				return false;
-			value = BigInteger.Abs(value);
-			if (value.IsOne)
+			if (value.IsZero)
 				return false;
 
-			if (value <= ulong.MaxValue)
-				return IsPrime((ulong)value);
+			bool primeCheck(in BigInteger v)
+			{
+				if (v == BIG.TWO || v == BIG.THREE)
+					return true;
 
-			return value % 2 != 0
-				&& value % 3 != 0
-				&& IsPrime(value, 6);
+				if (v.IsOne || v.IsEven)
+					return false;
+
+				if (v <= ulong.MaxValue)
+					return IsPrime((ulong)v);
+
+				return v % 3 != 0
+					   && IsPrime(v, 6);
+			}
+
+			return value.Sign == -1
+				? primeCheck(BigInteger.Abs(value))
+				: primeCheck(in value);
 		}
 
-		internal static bool IsPrime(BigInteger value, BigInteger divisor)
+		internal static bool IsPrime(in BigInteger value, BigInteger divisor)
 		{
 			while (divisor * divisor - 2 * divisor + 1 <= value)
 			{
@@ -80,18 +89,15 @@ namespace Open.Numeric.Primes
 
 		public class U64 : PrimalityU64Base
 		{
-			protected override bool IsPrimeInternal(ulong value)
-			{
-				return Polynomial.IsPrimeInternal(value);
-			}
+			// ReSharper disable once MemberHidesStaticFromOuterClass
+			protected override bool IsPrimeInternal(in ulong value)
+			=> Polynomial.IsPrimeInternal(in value);
 		}
 
 		public class BigInt : PrimalityBigIntBase
 		{
-			protected override bool IsPrimeInternal(BigInteger value)
-			{
-				return Polynomial.IsPrime(value, 6UL);
-			}
+			protected override bool IsPrimeInternal(in BigInteger value)
+			=> Polynomial.IsPrime(in value, 6UL);
 		}
 	}
 

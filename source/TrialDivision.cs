@@ -12,26 +12,23 @@ namespace Open.Numeric.Primes
 			= (new List<ulong>() { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, })
 				.AsReadOnly();
 
-		/// <summary>
-		/// Returns a parallel enumerable that will iterate every prime starting at the starting value.
-		/// </summary>
-		/// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-		/// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
-		/// <returns></returns>
-		public override ParallelQuery<ulong> InParallel(ulong staringAt, ushort? degreeOfParallelism = null)
+		/// <inheritdoc />
+		public override ParallelQuery<ulong> InParallel(in ulong staringAt, ushort? degreeOfParallelism = null)
 		{
-			var tests = AllNumbers().SkipWhile(v => v < staringAt) // This is the difference.
+			var sa = staringAt;
+			var tests = AllNumbers().SkipWhile(v => v < sa) // This is the difference.
 				.AsParallel().AsOrdered();
 
 			if (degreeOfParallelism.HasValue)
 				tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
 
-			return tests.Where(v => IsPrime(v));
+			return tests.Where(v => IsPrime(in v));
 		}
 
+		// ReSharper disable once UnusedMember.Local
 		const ulong MAX_ULONG_SQUARE_ROOT = 4294967296;
 
-		protected override bool IsPrimeInternal(ulong value)
+		protected override bool IsPrimeInternal(in ulong value)
 		{
 			var sqr = (ulong)Math.Sqrt(value);
 
@@ -86,25 +83,19 @@ namespace Open.Numeric.Primes
 		}
 
 		public override IEnumerator<ulong> GetEnumerator()
-		{
-			return AllNumbers().GetEnumerator();
-		}
+			=> AllNumbers().GetEnumerator();
 
+		/// <inheritdoc />
 		/// <summary>
 		/// Returns an enumerable that will iterate every prime starting at the starting value.
 		/// </summary>
-		/// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
+		/// <param name="startingAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
 		/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
 		public override IEnumerable<ulong> StartingAt(ulong startingAt)
-		{
-			return AllNumbers()
-				.SkipWhile(n => n < startingAt);
-		}
+			=> AllNumbers().SkipWhile(n => n < startingAt);
 
-		protected override bool IsFactorable(ulong value)
-		{
-			return true; // Do not do prime check first.
-		}
+		protected override bool IsFactorable(in ulong value)
+			=> true; // Do not do prime check first.
 	}
 
 	public class TrialDivisionMemoized : TrialDivision
@@ -117,11 +108,9 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <returns>A memoized enumerable that will iterate every prime starting at the starting value</returns>
 		protected override IEnumerable<ulong> AllNumbers()
-		{
-			return LazyInitializer
+			=> LazyInitializer
 				.EnsureInitialized(ref Memoized,
 					() => NumbersMemoizable().Memoize());
-		}
 
 		protected IEnumerable<ulong> NumbersMemoizable()
 		{
@@ -136,10 +125,8 @@ namespace Open.Numeric.Primes
              * Note: here is where things start to recurse but should work perfectly
              * as the next primes can only be discovered by their predecessors.
              */
-			foreach (var n in ValidPrimeTests(last + 1).Where(p => IsPrime(p)))
-			{
+			foreach (var n in ValidPrimeTests(last + 1).Where(v => IsPrime(in v)))
 				yield return n;
-			}
 		}
 
 	}

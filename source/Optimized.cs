@@ -4,29 +4,25 @@ namespace Open.Numeric.Primes
 {
 	public class Optimized : PrimalityU64Base
 	{
-		protected override bool IsPrimeInternal(ulong value)
+		protected override bool IsPrimeInternal(in ulong value)
 		{
-			if (value < 805000000) // Aproximate value where Polynomial prime detection stops being better than MillerRabin.
-				return Polynomial.IsPrimeInternal(value);
-
-			return MillerRabin.IsPrime(value);
+			return value < 805000000
+				? Polynomial.IsPrimeInternal(in value)
+				: MillerRabin.IsPrime(in value);
 		}
 
 		public readonly BigInt Big = new BigInt();
 
 		public class BigInt : PrimalityBigIntBase
 		{
-			protected override bool IsPrimeInternal(BigInteger value)
+			protected override bool IsPrimeInternal(in BigInteger value)
 			{
 				if (value <= ulong.MaxValue)
 					return MillerRabin.IsPrime((ulong)value);
 
-				if (!MillerRabin.IsProbablePrime(value))
-					return false; // false is the only deterministic result.
+				return MillerRabin.IsProbablePrime(in value) && Polynomial.IsPrime(in value, 6);
 
 				// Lucas-Selfridge here? :(
-
-				return Polynomial.IsPrime(value, 6);
 			}
 		}
 	}
