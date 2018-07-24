@@ -31,7 +31,7 @@ namespace Open.Numeric.Primes
 					break;
 			}
 
-			ReadOnlySpan<ulong> ar;
+			ulong[] ar;
 			if (value < 4759123141UL) ar = AR1;
 			else if (value < 341550071728321UL) ar = AR2;
 			else ar = AR3;

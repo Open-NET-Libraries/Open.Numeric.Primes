@@ -95,6 +95,44 @@ namespace Open.Numeric.Primes.Tests
 		}
 
 		[TestMethod]
+		public void CommonFactors_ULong()
+		{
+			Assert.AreEqual(12UL,
+				Prime
+					.CommonFactors(84UL, 756UL, 108UL)
+					.Aggregate(1UL, (p, c) => p * c)
+			);
+
+			Assert.AreEqual(3UL,
+				Prime
+					.CommonFactors(84UL, 756UL, 108UL, 3UL * 7UL * 13UL)
+					.Aggregate(1UL, (p, c) => p * c)
+			);
+
+			Assert.AreEqual(4UL,
+				Prime
+					.CommonFactors(84UL, 756UL, 108UL, 4UL * 7UL * 17UL)
+					.Aggregate(1UL, (p, c) => p * c)
+			);
+		}
+
+		[TestMethod]
+		public void CommonFactors_BigInt()
+		{
+			Assert.AreEqual(new BigInteger(12),
+				Prime
+					.CommonFactors(new BigInteger(84), new BigInteger(756), new BigInteger(108))
+					.Aggregate(BigInteger.One, (p, c) => p * c)
+			);
+
+			Assert.AreEqual(new BigInteger(3),
+				Prime
+					.CommonFactors(new BigInteger(84), new BigInteger(756), new BigInteger(108), new BigInteger(3 * 7 * 13))
+					.Aggregate(BigInteger.One, (p, c) => p * c)
+			);
+		}
+
+		[TestMethod]
 		public void PrimeFactors_BigInt()
 		{
 			for (BigInteger i = 0; i < 1000; i++)

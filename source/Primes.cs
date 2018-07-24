@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Open.Collections;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -266,6 +267,211 @@ namespace Open.Numeric.Primes
 				? Factors(value).Skip(1).TakeWhile(v => v != value)
 				: Factors(value);
 
+		/// <summary>
+		/// Iterates all the possible common prime factors of the provided numbers.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>An enumerable of the common prime factors.</returns>
+		public static IEnumerable<long> CommonFactors(IEnumerable<long> values)
+			=> CommonFactors(values.Distinct().Select(v => (ulong)Math.Abs(v)))
+				.Select(Convert.ToInt64);
+
+		/// <summary>
+		/// Iterates all the possible common prime factors of the provided numbers.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>An enumerable of the common prime factors.</returns>
+		public static IEnumerable<ulong> CommonFactors(IEnumerable<ulong> values)
+		{
+			// Use a persistent enumerator to get through (or fail) results.
+			using (var factors = values
+				.Distinct()
+				.Select(v => Factors(v).GetEnumerator())
+				.Memoize()) // ** You might be asking? Why? Because the preflight might fail, and exit early.
+			{
+				var maxFactor = -1;
+				try
+				{
+					while (true)
+					{
+						// 0 = just starting a loop
+						ulong current = 0;
+
+						retry:
+						var i = 0; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iteratons.
+						foreach (var e in factors)
+						{
+							if (maxFactor < i)
+							{
+								if (!e.MoveNext() || e.Current == 0UL)
+									yield break;
+
+								maxFactor = i;
+							}
+
+							++i;
+
+							// We just started? Increment to the first one.
+							if (current == 0)
+							{
+								if (!e.MoveNext())
+									yield break;
+
+								current = e.Current;
+							}
+
+							// Get the next candidate...
+							while (current > e.Current)
+							{
+								if (!e.MoveNext())
+									yield break;
+							}
+
+							if (current < e.Current)
+							{
+								// Whoops... New first level factor...
+								current = e.Current;
+								goto retry;
+							}
+
+							// Have a match? Keep checking.
+							current = e.Current;
+						}
+
+						// If we arrive here with a valid value, then it is common.
+						if (current != 0)
+							yield return current;
+					}
+
+				}
+				finally
+				{
+					foreach (var d in factors)
+						d.Dispose(); // dispose of the underlying enumerators before disposing the LazyList (.Memoize());
+				}
+
+			}
+		}
+
+		/// <summary>
+		/// Iterates all the possible common prime factors of the provided numbers.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>An enumerable of the common prime factors.</returns>
+		public static IEnumerable<ulong> CommonFactors(params ulong[] values)
+			=> CommonFactors((IEnumerable<ulong>)values);
+
+		/// <summary>
+		/// Iterates all the possible common prime factors of the provided numbers.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>An enumerable of the common prime factors.</returns>
+		public static IEnumerable<BigInteger> CommonFactors(IEnumerable<BigInteger> values)
+		{
+			// Use a persistent enumerator to get through (or fail) results.
+			using (var factors = values
+				.Distinct()
+				.Select(v => Factors(v).GetEnumerator())
+				.Memoize()) // ** You might be asking? Why? Because the preflight might fail, and exit early.
+			{
+				var maxFactor = -1;
+				try
+				{
+					while (true)
+					{
+						// 0 = just starting a loop
+						var current = BigInteger.Zero;
+
+						retry:
+						var i = 0; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iteratons.
+						foreach (var e in factors)
+						{
+							if (maxFactor < i)
+							{
+								if (!e.MoveNext() || e.Current.IsZero)
+									yield break;
+
+								maxFactor = i;
+							}
+
+							++i;
+
+							// We just started? Increment to the first one.
+							if (current.IsZero)
+							{
+								if (!e.MoveNext())
+									yield break;
+
+								current = e.Current;
+							}
+
+							// Get the next candidate...
+							while (current > e.Current)
+							{
+								if (!e.MoveNext())
+									yield break;
+							}
+
+							if (current < e.Current)
+							{
+								// Whoops... New first level factor...
+								current = e.Current;
+								goto retry;
+							}
+
+							// Have a match? Keep checking.
+							current = e.Current;
+						}
+
+						// If we arrive here with a valid value, then it is common.
+						if (!current.IsZero)
+							yield return current;
+					}
+
+				}
+				finally
+				{
+					foreach (var d in factors)
+						d.Dispose(); // dispose of the underlying enumerators before disposing the LazyList (.Memoize());
+				}
+
+			}
+		}
+
+		/// <summary>
+		/// Iterates all the possible common prime factors of the provided numbers.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>An enumerable of the common prime factors.</returns>
+		public static IEnumerable<BigInteger> CommonFactors(params BigInteger[] values)
+			=> CommonFactors((IEnumerable<BigInteger>)values);
+
+		/// <summary>
+		/// Returns the greatest common (positive) factor (GCF) of all the provided values.
+		/// Returns 1 if none found.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>The greatest common factor or 1 if none found.</returns>
+		public static long GreatestFactor(IEnumerable<long> values)
+			=> CommonFactors(values).Aggregate(1L, (p, c) => p * c);
+
+		/// <summary>
+		/// Returns the greatest common (positive) factor (GCF) of all the provided values.
+		/// Returns 1 if none found.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>The greatest common factor or 1 if none found.</returns>
+		public static ulong GreatestFactor(IEnumerable<ulong> values)
+			=> CommonFactors(values).Aggregate(1UL, (p, c) => p * c);
+
+		/// <summary>
+		/// Returns the greatest common (positive) factor (GCF) of all the provided values.
+		/// Returns 1 if none found.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>The greatest common factor or 1 if none found.</returns>
+		public static BigInteger GreatestFactor(IEnumerable<BigInteger> values)
+			=> CommonFactors(values).Aggregate(BigInteger.One, (p, c) => p * c);
 	}
 
 
@@ -442,6 +648,56 @@ namespace Open.Numeric.Primes
 			public static IEnumerable<dynamic> PrimeFactors(this float value, bool omitOneAndValue = false)
 				=> Prime.Factors(value, omitOneAndValue);
 
+			/// <summary>
+			/// Iterates all the possible common prime factors of the provided numbers.
+			/// </summary>
+			/// <param name="values">The values to find common prime factors from.</param>
+			/// <returns>An enumerable of the common prime factors.</returns>
+			public static IEnumerable<long> CommonPrimeFactors(this IEnumerable<long> values)
+				=> Prime.CommonFactors(values);
+
+			/// <summary>
+			/// Iterates all the possible common prime factors of the provided numbers.
+			/// </summary>
+			/// <param name="values">The values to find common prime factors from.</param>
+			/// <returns>An enumerable of the common prime factors.</returns>
+			public static IEnumerable<ulong> CommonPrimeFactors(this IEnumerable<ulong> values)
+				=> Prime.CommonFactors(values);
+
+			/// <summary>
+			/// Iterates all the possible common prime factors of the provided numbers.
+			/// </summary>
+			/// <param name="values">The values to find common prime factors from.</param>
+			/// <returns>An enumerable of the common prime factors.</returns>
+			public static IEnumerable<BigInteger> CommonPrimeFactors(this IEnumerable<BigInteger> values)
+				=> Prime.CommonFactors(values);
+
+			/// <summary>
+			/// Returns the greatest common (positive) factor (GCF) of all the provided values.
+			/// Returns 1 if none found.
+			/// </summary>
+			/// <param name="values">The values to find common prime factors from.</param>
+			/// <returns>The greatest common factor or 1 if none found.</returns>
+			public static long GreatestPrimeFactor(this IEnumerable<long> values)
+				=> Prime.GreatestFactor(values);
+
+			/// <summary>
+			/// Returns the greatest common (positive) factor (GCF) of all the provided values.
+			/// Returns 1 if none found.
+			/// </summary>
+			/// <param name="values">The values to find common prime factors from.</param>
+			/// <returns>The greatest common factor or 1 if none found.</returns>
+			public static ulong GreatestPrimeFactor(this IEnumerable<ulong> values)
+				=> Prime.GreatestFactor(values);
+
+			/// <summary>
+			/// Returns the greatest common (positive) factor (GCF) of all the provided values.
+			/// Returns 1 if none found.
+			/// </summary>
+			/// <param name="values">The values to find common prime factors from.</param>
+			/// <returns>The greatest common factor or 1 if none found.</returns>
+			public static BigInteger GreatestPrimeFactor(this IEnumerable<BigInteger> values)
+				=> Prime.GreatestFactor(values);
 		}
 	}
 }

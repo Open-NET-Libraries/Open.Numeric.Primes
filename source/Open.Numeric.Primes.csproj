@@ -18,6 +18,7 @@ Part of the "Open" set of libraries.</Description>
     <AssemblyVersion>1.4.2.0</AssemblyVersion>
     <FileVersion>1.4.2.0</FileVersion>
     <PackageReleaseNotes>Updated method signatures for 'in' and documentation.
+Added CommonFactors and GreatestFactor methods and extensions.
 </PackageReleaseNotes>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -30,10 +31,5 @@ Part of the "Open" set of libraries.</Description>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Open.Collections" Version="2.4.3" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Memory">
-      <HintPath>C:\Users\essence\.nuget\packages\system.memory\4.5.1\ref\netstandard2.0\System.Memory.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>
