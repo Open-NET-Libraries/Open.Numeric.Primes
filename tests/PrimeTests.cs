@@ -97,6 +97,18 @@ namespace Open.Numeric.Primes.Tests
 		[TestMethod]
 		public void CommonFactors_ULong()
 		{
+			Assert.AreEqual(3UL,
+				Prime
+					.CommonFactors(9UL, 3UL, 3UL)
+					.Aggregate(1UL, (p, c) => p * c)
+			);
+
+			Assert.AreEqual(3UL,
+				Prime
+					.CommonFactors(3UL, 3UL, 9UL)
+					.Aggregate(1UL, (p, c) => p * c)
+			);
+
 			Assert.AreEqual(12UL,
 				Prime
 					.CommonFactors(84UL, 756UL, 108UL)

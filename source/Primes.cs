@@ -1,6 +1,7 @@
 ﻿using Open.Collections;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
@@ -283,19 +284,33 @@ namespace Open.Numeric.Primes
 		/// <returns>An enumerable of the common prime factors.</returns>
 		public static IEnumerable<ulong> CommonFactors(IEnumerable<ulong> values)
 		{
+			//#if DEBUG
+			//			foreach (var v in values.Distinct())
+			//			{
+			//				Debug.WriteLine($"{v}:");
+			//				foreach (var f in Factors(v))
+			//				{
+			//					Debug.Write($"{f},");
+			//				}
+			//				Debug.WriteLine("\n");
+			//			}
+			//#endif
+
 			// Use a persistent enumerator to get through (or fail) results.
 			using (var factors = values
 				.Distinct()
 				.Select(v => Factors(v).GetEnumerator())
 				.Memoize()) // ** You might be asking? Why? Because the preflight might fail, and exit early.
 			{
+
 				var maxFactor = -1;
 				try
 				{
 					while (true)
 					{
 						// 0 = just starting a loop
-						ulong current = 0;
+						var current = 0UL;
+						var retryIndex = -1;
 
 						retry:
 						var i = 0; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iteratons.
@@ -303,38 +318,38 @@ namespace Open.Numeric.Primes
 						{
 							if (maxFactor < i)
 							{
-								if (!e.MoveNext() || e.Current == 0UL)
+								if (!e.MoveNext() && e.Current == 0UL)
 									yield break;
 
 								maxFactor = i;
 							}
 
-							++i;
+							// The retryIndex means we came to a point in the list where we may come back to it and need to reuse the existing value.
+							if (retryIndex == i)
+								retryIndex = -1;
+							else if (!e.MoveNext())
+								yield break;
 
-							// We just started? Increment to the first one.
-							if (current == 0)
+							if (current != 0)
 							{
-								if (!e.MoveNext())
-									yield break;
+								// Get the next candidate...
+								while (current > e.Current)
+								{
+									if (!e.MoveNext())
+										yield break;
+								}
 
-								current = e.Current;
-							}
-
-							// Get the next candidate...
-							while (current > e.Current)
-							{
-								if (!e.MoveNext())
-									yield break;
-							}
-
-							if (current < e.Current)
-							{
-								// Whoops... New first level factor...
-								current = e.Current;
-								goto retry;
+								if (current < e.Current)
+								{
+									// Whoops... New first level factor...
+									current = e.Current;
+									retryIndex = i;
+									goto retry;
+								}
 							}
 
 							// Have a match? Keep checking.
+							++i;
 							current = e.Current;
 						}
 
@@ -379,8 +394,10 @@ namespace Open.Numeric.Primes
 				{
 					while (true)
 					{
+
 						// 0 = just starting a loop
 						var current = BigInteger.Zero;
+						var retryIndex = -1;
 
 						retry:
 						var i = 0; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iteratons.
@@ -388,38 +405,41 @@ namespace Open.Numeric.Primes
 						{
 							if (maxFactor < i)
 							{
-								if (!e.MoveNext() || e.Current.IsZero)
+								if (!e.MoveNext() && e.Current.IsZero)
 									yield break;
 
 								maxFactor = i;
 							}
 
-							++i;
+							/*	The retryIndex means we came to a point in the list
+								where we may come back to it and need to reuse the existing value
+								before continuing. */
 
-							// We just started? Increment to the first one.
-							if (current.IsZero)
+							if (retryIndex == i)
+								retryIndex = -1;
+							else if (!e.MoveNext())
+								yield break;
+
+							if (!current.IsZero)
 							{
-								if (!e.MoveNext())
-									yield break;
+								// Get the next candidate...
+								while (current > e.Current)
+								{
+									if (!e.MoveNext())
+										yield break;
+								}
 
-								current = e.Current;
-							}
-
-							// Get the next candidate...
-							while (current > e.Current)
-							{
-								if (!e.MoveNext())
-									yield break;
-							}
-
-							if (current < e.Current)
-							{
-								// Whoops... New first level factor...
-								current = e.Current;
-								goto retry;
+								if (current < e.Current)
+								{
+									// Whoops... New first level factor...
+									current = e.Current;
+									retryIndex = i;
+									goto retry;
+								}
 							}
 
 							// Have a match? Keep checking.
+							++i;
 							current = e.Current;
 						}
 

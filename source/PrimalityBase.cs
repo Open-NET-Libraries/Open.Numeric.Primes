@@ -133,13 +133,12 @@ namespace Open.Numeric.Primes
 			{
 				return StartingAt(absStart)
 					.TakeWhile(v => v < long.MaxValue)
-					.Cast<long>()
-					.Select(v => -v);
+					.Select(v => -Convert.ToInt64(v));
 			}
 
 			return StartingAt(absStart)
 				.TakeWhile(v => v < long.MaxValue)
-				.Cast<long>();
+				.Select(Convert.ToInt64);
 		}
 
 		/// <inheritdoc />
@@ -217,7 +216,7 @@ namespace Open.Numeric.Primes
 				var last = 1L;
 
 				// For larger numbers, a quick prime check can prevent large iterations.
-				if (IsFactorable((ulong)value))
+				if (IsFactorable(value))
 				{
 					foreach (var p in StartingAt(2L))
 					{
@@ -235,6 +234,9 @@ namespace Open.Numeric.Primes
 			}
 			yield return value;
 		}
+
+		protected bool IsFactorable(in long value)
+			=> !IsPrime(in value);
 
 		/// <inheritdoc />
 		public override ulong Next(in ulong after)
@@ -275,8 +277,8 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="value">The value to validate.</param>
 		/// <returns>True if the value provided is prime</returns>
-		public bool IsPrime(long value)
-			=> IsPrime((ulong)Math.Abs(value));
+		public bool IsPrime(in long value)
+			=> IsPrime(Convert.ToUInt64(Math.Abs(value)));
 
 		/// <summary>
 		/// Should only check for primes that aren't divisible by 2 or 3.
@@ -332,27 +334,13 @@ namespace Open.Numeric.Primes
 		/// <inheritdoc />
 		public override ParallelQuery<BigInteger> InParallel(in BigInteger staringAt, ushort? degreeOfParallelism = null)
 		{
-			if (staringAt >= ulong.MaxValue)
-			{
-				var testsBig = ValidPrimeTests(staringAt)
-					.AsParallel().AsOrdered();
-
-				if (degreeOfParallelism.HasValue)
-					testsBig = testsBig.WithDegreeOfParallelism(degreeOfParallelism.Value);
-
-				return testsBig.Where(IsPrime);
-			}
-
-			var tests = ValidPrimeTests((ulong)staringAt)
-					.AsParallel().AsOrdered();
+			var testsBig = ValidPrimeTests(staringAt)
+				.AsParallel().AsOrdered();
 
 			if (degreeOfParallelism.HasValue)
-				tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
+				testsBig = testsBig.WithDegreeOfParallelism(degreeOfParallelism.Value);
 
-			return tests
-				.Where(IsPrime)
-				.Select(v => v)
-				.Concat(InParallel(ulong.MaxValue));
+			return testsBig.Where(IsPrime);
 		}
 
 		/// <inheritdoc />
