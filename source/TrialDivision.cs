@@ -124,9 +124,9 @@ namespace Open.Numeric.Primes
              * Note: here is where things start to recurse but should work perfectly
              * as the next primes can only be discovered by their predecessors.
              */
-			foreach (var n in ValidPrimeTests(last + 1).Where(v => IsPrime(in v)))
-				yield return n;
-		}
+            foreach (var n in ValidPrimeTests(last + 1).Where(v => IsPrime(in v)))
+                yield return n;
+        }
 
-	}
+    }
 }
