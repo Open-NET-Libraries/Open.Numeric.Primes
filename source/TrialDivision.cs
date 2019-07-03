@@ -25,8 +25,7 @@ namespace Open.Numeric.Primes
 			return tests.Where(v => IsPrime(in v));
 		}
 
-		// ReSharper disable once UnusedMember.Local
-		const ulong MAX_ULONG_SQUARE_ROOT = 4294967296;
+		// const ulong MAX_ULONG_SQUARE_ROOT = 4294967296;
 
 		protected override bool IsPrimeInternal(in ulong value)
 		{

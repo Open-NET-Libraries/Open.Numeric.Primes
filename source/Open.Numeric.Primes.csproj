@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <Authors>electricessence</Authors>
     <Company />
     <Product />
@@ -8,17 +8,18 @@
 
 Part of the "Open" set of libraries.</Description>
     <Copyright>https://github.com/electricessence/Open.Numeric.Primes/blob/master/LISCENSE.md</Copyright>
-    <PackageLicenseUrl>https://github.com/electricessence/Open.Numeric.Primes/blob/master/LISCENSE.md</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/electricessence/Open.Numeric.Primes/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/electricessence/Open.Numeric.Primes/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>prime-numbers, primes, prime-factorization, prime-detection, prime-discovery</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.4.6</Version>
-    <AssemblyVersion>1.4.6.0</AssemblyVersion>
-    <FileVersion>1.4.6.0</FileVersion>
+    <Version>1.5.0</Version>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
     <PackageReleaseNotes>Casting fix for Int64 and some BigInteger to UInt64 conversions.
 </PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>True</Optimize>
@@ -29,6 +30,6 @@ Part of the "Open" set of libraries.</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="Open.Collections" Version="2.4.4" />
+    <PackageReference Include="Open.Collections" Version="2.6.0" />
   </ItemGroup>
 </Project>
