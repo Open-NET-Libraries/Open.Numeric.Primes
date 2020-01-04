@@ -147,7 +147,13 @@ namespace Open.Numeric.Primes
             // Instead, random BigIntegers are constructed from randomly generated
             // byte arrays of the same length as the source.
             var rng = RandomNumberGenerator.Create();
-            var bytes = new byte[source.ToByteArray().Length]; // .LongLength?
+            var len = source.ToByteArray().Length; // .LongLength?
+#if NETSTANDARD2_1
+            var byteArray = System.Buffers.ArrayPool<byte>.Shared.Rent(len);
+            var bytes = byteArray.AsSpan();
+#else
+            var bytes = new byte[len]; // .LongLength?
+#endif
 
             for (var i = 0; i < certainty; i++)
             {
@@ -175,6 +181,10 @@ namespace Open.Numeric.Primes
                 if (x != source - 1)
                     return false;
             }
+
+#if NETSTANDARD2_1
+            System.Buffers.ArrayPool<byte>.Shared.Return(byteArray);
+#endif
 
             return true;
         }
