@@ -100,7 +100,7 @@ namespace Open.Numeric.Primes
 	public class TrialDivisionMemoized : TrialDivision
 	{
 
-		LazyList<ulong> Memoized;
+		LazyList<ulong>? Memoized;
 
 		/// <summary>
 		/// Returns a memoized enumerable that will iterate every prime starting at the starting value.
@@ -109,7 +109,7 @@ namespace Open.Numeric.Primes
 		protected override IEnumerable<ulong> AllNumbers()
 			=> LazyInitializer
 				.EnsureInitialized(ref Memoized,
-					() => NumbersMemoizable().Memoize());
+					() => NumbersMemoizable().Memoize())!;
 
 		protected IEnumerable<ulong> NumbersMemoizable()
 		{

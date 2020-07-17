@@ -1,37 +1,48 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Authors>electricessence</Authors>
-		<Company />
-		<Product />
 		<Description>
 			Methods and extensions for prime number detection and discovery.
 
 			Part of the "Open" set of libraries.
 		</Description>
-		<Copyright>https://github.com/electricessence/Open.Numeric.Primes/blob/master/LISCENSE.md</Copyright>
-		<PackageLicenseUrl></PackageLicenseUrl>
-		<PackageProjectUrl>https://github.com/electricessence/Open.Numeric.Primes/</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/electricessence/Open.Numeric.Primes/</RepositoryUrl>
+		<PackageTags>prime numbers;primes;prime factorization;prime detection;prime discovery</PackageTags>
+		<Copyright>© electricessence (Oren F.) All rights reserved.</Copyright>
+		<PackageProjectUrl>https://github.com/Open-NET-Libraries/Open.Numeric.Primes/</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/Open-NET-Libraries/Open.Numeric.Primes/</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>prime-numbers, primes, prime-factorization, prime-detection, prime-discovery</PackageTags>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Version>1.5.5</Version>
+		<Version>1.6.0</Version>
 		<PackageReleaseNotes></PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageIcon>logo.png</PackageIcon>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<Optimize>True</Optimize>
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
+
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-		<PackageReference Include="Open.Collections" Version="2.7.2" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="logo.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="Open.Collections" Version="2.8.0" />
+	</ItemGroup>
+
 	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-		<PackageReference Include="System.Memory" Version="4.5.3" />
+		<PackageReference Include="System.Memory" Version="4.5.4" />
 	</ItemGroup>
+
 </Project>
