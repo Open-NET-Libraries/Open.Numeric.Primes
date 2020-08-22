@@ -8,8 +8,6 @@ namespace Open.Numeric.Primes.Tests
 {
 	public static class PrimeNumbers
 	{
-
-
 		[Theory]
 		[InlineData(2130706433)]
 		public static void TrialDivision32Test(uint value)
