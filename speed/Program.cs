@@ -32,6 +32,7 @@ internal class Program
 		yield return string.Format("{0} TrialDivisionMemoized Cached", Test(tdm));
 		yield return string.Format("{0} Polynomial", Test<Polynomial.U64>(out _));
 		yield return string.Format("{0} MillerRabin", Test<MillerRabin.U64>(out _));
+		yield return string.Format("{0} Optimized", Test<Optimized>(out _));
 	}
 
 	static TimeSpan Test<T>(out List<ulong> found, ulong number = START_NUMBER_DEFAULT, ulong times = TIMES_DEFAULT)
