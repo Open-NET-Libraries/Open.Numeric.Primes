@@ -18,6 +18,14 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="value">Value to verify.</param>
 		/// <returns>True if the provided value is a prime number</returns>
+		public static bool IsPrime(uint value)
+			=> Polynomial.IsPrimeInternal(value);
+
+		/// <summary>
+		/// Validates if a number is prime.
+		/// </summary>
+		/// <param name="value">Value to verify.</param>
+		/// <returns>True if the provided value is a prime number</returns>
 		public static bool IsPrime(in ulong value)
 			=> Prime.Numbers.IsPrime(in value);
 
