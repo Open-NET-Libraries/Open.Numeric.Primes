@@ -12,7 +12,17 @@ internal class Program
 
 	static void Main()
 	{
+		Console.WriteLine("Singular Trial Division Tests:");
+
+		const uint test32 = 2130706433;
+		Console.WriteLine("{0} U32 Benchmark", TrialDivBenchmark(test32));
+		Console.WriteLine("{0} U32", TrialDiv(test32));
+		const ulong test64 = 8592868089022906369;
+		Console.WriteLine("{0} U64 Benchmark", TrialDivBenchmark(test64));
+		Console.WriteLine("{0} U64", TrialDiv(test64));
+
 		Console.WriteLine();
+		Console.WriteLine("Batch Tests:");
 
 		foreach (var s in Tests().OrderBy(t => t))
 			Console.WriteLine(s);
@@ -38,8 +48,52 @@ internal class Program
 		yield return string.Format("{0} Optimized", Test<Optimized>(out _));
 	}
 
+	static TimeSpan TrialDivBenchmark(uint value)
+	{
+		var sw = Stopwatch.StartNew();
+		var max = Math.Sqrt(value);
+		for (var i = 3U; i < max; i += 2U)
+		{
+			if (value % i == 0) throw new Exception("Is not prime.");
+		}
+		sw.Stop();
+		return sw.Elapsed;
+	}
+
+	static TimeSpan TrialDivBenchmark(ulong value)
+	{
+		var sw = Stopwatch.StartNew();
+		var max = Math.Sqrt(value);
+		for (var i = 3UL; i < max; i += 2UL)
+		{
+			if (value % i == 0) throw new Exception("Is not prime.");
+		}
+		sw.Stop();
+		return sw.Elapsed;
+	}
+
+	static TimeSpan TrialDiv(uint value)
+	{
+		var t = new TrialDivision.U32();
+		t.IsPrime(value); // first run.
+		var sw = Stopwatch.StartNew();
+		if (!t.IsPrime(value)) throw new Exception("Is not prime.");
+		sw.Stop();
+		return sw.Elapsed;
+	}
+
+	static TimeSpan TrialDiv(ulong value)
+	{
+		var t = new TrialDivision.U64();
+		t.IsPrime(value); // first run.
+		var sw = Stopwatch.StartNew();
+		if (!t.IsPrime(value)) throw new Exception("Is not prime.");
+		sw.Stop();
+		return sw.Elapsed;
+	}
+
 	static TimeSpan Test<T>(out List<uint> found, uint number = START_NUMBER_DEFAULT, uint times = TIMES_DEFAULT)
-	where T : PrimalityBase<uint>, new()
+		where T : PrimalityBase<uint>, new()
 	{
 		var sw = Stopwatch.StartNew();
 		found = new List<uint>(PRIMES_TO_FIND);

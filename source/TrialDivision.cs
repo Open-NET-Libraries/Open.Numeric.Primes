@@ -13,6 +13,8 @@ namespace Open.Numeric.Primes
 			= (new ushort[] { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541 })
 				.ToImmutableArray();
 
+		static readonly ushort LastKnown = FirstKnown.Last();
+
 		public class U32 : PrimalityU32Base
 		{
 			public static readonly ImmutableArray<uint> FirstKnown32 = FirstKnown.Select(Convert.ToUInt32).ToImmutableArray();
@@ -30,28 +32,22 @@ namespace Open.Numeric.Primes
 				return tests.Where(v => IsPrime(in v));
 			}
 
-			// const ulong MAX_ULONG_SQUARE_ROOT = 4294967296;
-
 			protected override bool IsPrimeInternal(uint value)
 			{
 				var sqr = (uint)Math.Sqrt(value);
-
-				foreach (var p in AllNumbers())
+				for (var p = 5U; p <= sqr; p += 2U)
 				{
-					if (value == p || p > sqr)
-						return true;
-					if (value % p == 0)
-						return false;
+					if (value % p == 0) return false;
 				}
 
-				throw new Exception("Unexpectedly exited prime test loop.");
+				return true;
 			}
 
 			protected virtual IEnumerable<uint> AllNumbers()
 			{
 				var known = new LinkedList<uint>();
 				var last = 0U;
-				foreach (var k in FirstKnown32)
+				foreach (var k in FirstKnown32) // precomputed
 				{
 					yield return k;
 					last = k;
@@ -159,17 +155,14 @@ namespace Open.Numeric.Primes
 
 			protected override bool IsPrimeInternal(in ulong value)
 			{
-				var sqr = (ulong)Math.Sqrt(value);
 
-				foreach (var p in AllNumbers())
+				var sqr = (ulong)Math.Sqrt(value);
+				for (var p = 5UL; p <= sqr; p += 2UL)
 				{
-					if (value == p || p > sqr)
-						return true;
-					if (value % p == 0)
-						return false;
+					if (value % p == 0) return false;
 				}
 
-				throw new Exception("Unexpectedly exited prime test loop.");
+				return true;
 			}
 
 			protected virtual IEnumerable<ulong> AllNumbers()
