@@ -4,27 +4,6 @@ namespace Open.Numeric.Primes
 {
 	public static class Polynomial
 	{
-		const ulong MAX_ULONG_DIVISOR = 4294967296UL;
-
-		internal static bool IsPrimeInternal(in ulong value)
-		{
-			ulong divisor = 6;
-			while (divisor * divisor - 2 * divisor + 1 <= value)
-			{
-				if (value % (divisor - 1) == 0)
-					return false;
-
-				if (value % (divisor + 1) == 0)
-					return false;
-
-				divisor += 6;
-
-				if (divisor > MAX_ULONG_DIVISOR)
-					return IsPrime(value, divisor);
-			}
-			return true;
-		}
-
 		const uint MAX_UINT_DIVISOR = 65536U;
 
 		internal static bool IsPrimeInternal(uint value)
@@ -41,8 +20,32 @@ namespace Open.Numeric.Primes
 				divisor += 6;
 
 				if (divisor > MAX_UINT_DIVISOR)
+					return IsPrimeInternal(value, divisor);
+			}
+			return true;
+		}
+
+		const ulong MAX_ULONG_DIVISOR = 4294967296UL;
+
+		internal static bool IsPrimeInternal(in ulong value, ulong divisor = 6)
+		{
+			if (divisor > MAX_ULONG_DIVISOR)
+				return IsPrime(value, divisor);
+
+			while (divisor * divisor - 2 * divisor + 1 <= value)
+			{
+				if (value % (divisor - 1) == 0)
+					return false;
+
+				if (value % (divisor + 1) == 0)
+					return false;
+
+				divisor += 6;
+
+				if (divisor > MAX_ULONG_DIVISOR)
 					return IsPrime(value, divisor);
 			}
+
 			return true;
 		}
 
