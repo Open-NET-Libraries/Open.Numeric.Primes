@@ -18,6 +18,14 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="value">Value to verify.</param>
 		/// <returns>True if the provided value is a prime number</returns>
+		public static bool IsPrime(uint value)
+			=> Polynomial.IsPrimeInternal(value);
+
+		/// <summary>
+		/// Validates if a number is prime.
+		/// </summary>
+		/// <param name="value">Value to verify.</param>
+		/// <returns>True if the provided value is a prime number</returns>
 		public static bool IsPrime(in ulong value)
 			=> Prime.Numbers.IsPrime(in value);
 
@@ -477,7 +485,25 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="values">The values to find common prime factors from.</param>
 		/// <returns>The greatest common factor or 1 if none found.</returns>
+		public static ulong GreatestFactor(params ulong[] values)
+			=> CommonFactors(values).Aggregate(1UL, (p, c) => p * c);
+
+		/// <summary>
+		/// Returns the greatest common (positive) factor (GCF) of all the provided values.
+		/// Returns 1 if none found.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>The greatest common factor or 1 if none found.</returns>
 		public static BigInteger GreatestFactor(IEnumerable<BigInteger> values)
+			=> CommonFactors(values).Aggregate(BigInteger.One, (p, c) => p * c);
+
+		/// <summary>
+		/// Returns the greatest common (positive) factor (GCF) of all the provided values.
+		/// Returns 1 if none found.
+		/// </summary>
+		/// <param name="values">The values to find common prime factors from.</param>
+		/// <returns>The greatest common factor or 1 if none found.</returns>
+		public static BigInteger GreatestFactor(params BigInteger[] values)
 			=> CommonFactors(values).Aggregate(BigInteger.One, (p, c) => p * c);
 	}
 

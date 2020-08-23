@@ -1,16 +1,17 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Numerics;
 
 namespace Open.Numeric.Primes
 {
 	public class Optimized : PrimalityU64Base
 	{
+		const uint PERF_PIVOT = 805000000;
+
 		protected override bool IsPrimeInternal(in ulong value)
-		{
-			return value < 805000000
-				? Polynomial.IsPrimeInternal(in value)
+			=> value < PERF_PIVOT
+				? Polynomial.IsPrimeInternal(Convert.ToUInt32(value))
 				: MillerRabin.IsPrime(in value);
-		}
 
 		public readonly BigInt Big = new BigInt();
 
@@ -19,7 +20,10 @@ namespace Open.Numeric.Primes
 			protected override bool IsPrimeInternal(in BigInteger value)
 			{
 				if (value <= ulong.MaxValue)
+				{
+					if (value < PERF_PIVOT) Polynomial.IsPrimeInternal(Convert.ToUInt32(value));
 					return MillerRabin.IsPrime((ulong)value);
+				}
 
 				return MillerRabin.IsProbablePrime(in value) && Polynomial.IsPrime(in value, 6);
 
