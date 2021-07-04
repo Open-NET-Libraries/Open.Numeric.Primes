@@ -7,7 +7,6 @@ using System.Numerics;
 
 namespace Open.Numeric.Primes
 {
-	[SuppressMessage("ReSharper", "MemberCanBeProtected.Global")]
 	public abstract class PrimalityBase<T> : IEnumerable<T>
 		where T : struct
 	{
@@ -125,7 +124,6 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="value">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.  Passing a negative number here will produce a negative set of prime numbers.</param>
 		/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
-		[SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
 		public IEnumerable<int> StartingAt(int value)
 		{
 			var absStart = (uint)Math.Abs(value);
@@ -317,7 +315,6 @@ namespace Open.Numeric.Primes
 		/// </summary>
 		/// <param name="value">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.  Passing a negative number here will produce a negative set of prime numbers.</param>
 		/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
-		[SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
 		public IEnumerable<long> StartingAt(long value)
 		{
 			var absStart = (ulong)Math.Abs(value);

@@ -13,7 +13,7 @@ namespace Open.Numeric.Primes
 				? Polynomial.IsPrimeInternal(Convert.ToUInt32(value))
 				: MillerRabin.IsPrime(in value);
 
-		public readonly BigInt Big = new BigInt();
+		public readonly BigInt Big = new();
 
 		public class BigInt : PrimalityBigIntBase
 		{

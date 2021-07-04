@@ -122,7 +122,7 @@ namespace Open.Numeric.Primes
 				: double.Parse(value.ToString(CultureInfo.InvariantCulture));
 		}
 
-		public static readonly Optimized Numbers = new Optimized();
+		public static readonly Optimized Numbers = new();
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
