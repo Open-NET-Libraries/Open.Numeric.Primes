@@ -1,10 +1,11 @@
-﻿using Open.Numeric.Primes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-internal class Program
+namespace Open.Numeric.Primes.Speed;
+
+internal static class Program
 {
 	const uint START_NUMBER_DEFAULT = 10000;
 	const uint TIMES_DEFAULT = 1000;
@@ -56,6 +57,7 @@ internal class Program
 		{
 			if (value % i == 0) throw new Exception("Is not prime.");
 		}
+
 		sw.Stop();
 		return sw.Elapsed;
 	}
@@ -68,6 +70,7 @@ internal class Program
 		{
 			if (value % i == 0) throw new Exception("Is not prime.");
 		}
+
 		sw.Stop();
 		return sw.Elapsed;
 	}
@@ -107,6 +110,7 @@ internal class Program
 				found.Add(number);
 			}
 		}
+
 		sw.Stop();
 		return sw.Elapsed;
 	}
@@ -126,6 +130,7 @@ internal class Program
 				found.Add(number);
 			}
 		}
+
 		sw.Stop();
 		return sw.Elapsed;
 	}
@@ -140,10 +145,8 @@ internal class Program
 				number = prime.Next(number);
 			}
 		}
+
 		sw.Stop();
 		return sw.Elapsed;
 	}
-
-
-
 }

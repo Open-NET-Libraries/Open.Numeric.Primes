@@ -90,9 +90,11 @@ namespace Open.Numeric.Primes
 				return false;
 
 			if (value > 0)
+			{
 				return value <= ulong.MaxValue
 					? IsPrime((ulong)value)
 					: IsPrime((BigInteger)value);
+			}
 
 			var v = Math.Abs(value);
 			return v <= ulong.MaxValue
@@ -108,6 +110,7 @@ namespace Open.Numeric.Primes
 	/// </summary>
 	public static class Prime
 	{
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
 		static double ToDouble(in float value)
 		{
 			// Need to propertly convert a float to double to avoid potential precision error.
@@ -141,7 +144,6 @@ namespace Open.Numeric.Primes
 		/// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
 		public static IEnumerable<long> Factors(long value)
 			=> Numbers.Factors(value);
-
 
 		/// <summary>
 		/// Iterates the prime factors of the provided value.
@@ -357,7 +359,6 @@ namespace Open.Numeric.Primes
 					if (current != 0)
 						yield return current;
 				}
-
 			}
 			finally
 			{
@@ -391,7 +392,6 @@ namespace Open.Numeric.Primes
 			{
 				while (true)
 				{
-
 					// 0 = just starting a loop
 					var current = BigInteger.Zero;
 					var retryIndex = -1;
@@ -444,7 +444,6 @@ namespace Open.Numeric.Primes
 					if (!current.IsZero)
 						yield return current;
 				}
-
 			}
 			finally
 			{
@@ -507,7 +506,6 @@ namespace Open.Numeric.Primes
 			=> CommonFactors(values).Aggregate(BigInteger.One, (p, c) => p * c);
 	}
 
-
 	namespace Extensions
 	{
 		public static class PrimeExtensions
@@ -568,14 +566,12 @@ namespace Open.Numeric.Primes
 			public static bool IsPrime(this byte value)
 				=> Number.IsPrime(value);
 
-
 			/// <summary>
 			/// Validates if a number is prime.
 			/// </summary>
 			/// <returns>True if the provided value is a prime number</returns>
 			public static bool IsPrime(this double value)
 				=> Number.IsPrime(value);
-
 
 			/// <summary>
 			/// Validates if a number is prime.
@@ -659,7 +655,6 @@ namespace Open.Numeric.Primes
 			public static IEnumerable<BigInteger> PrimeFactors(this BigInteger value, bool omitOneAndValue = false)
 				=> Prime.Factors(value, omitOneAndValue);
 
-
 			/// <summary>
 			/// Iterates the prime factors of the provided value.
 			/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
@@ -669,7 +664,6 @@ namespace Open.Numeric.Primes
 			/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 			public static IEnumerable<dynamic> PrimeFactors(this double value, bool omitOneAndValue = false)
 				=> Prime.Factors(value, omitOneAndValue);
-
 
 			/// <summary>
 			/// Iterates the prime factors of the provided value.
