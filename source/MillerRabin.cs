@@ -6,9 +6,9 @@ namespace Open.Numeric.Primes;
 
 public static class MillerRabin
 {
-	static readonly ulong[] AR1 = { 2, 7, 61 };
-	static readonly ulong[] AR2 = { 2, 3, 5, 7, 11, 13, 17 };
-	static readonly ulong[] AR3 = { 2, 3, 5, 7, 11, 13, 17, 19, 23 };
+	static readonly ReadOnlyMemory<ulong> AR1 = new ulong[] { 2, 7, 61 };
+	static readonly ReadOnlyMemory<ulong> AR2 = new ulong[] { 2, 3, 5, 7, 11, 13, 17 };
+	static readonly ReadOnlyMemory<ulong> AR3 = new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23 };
 
 	/* Based on: https://stackoverflow.com/questions/4236673/sample-code-for-fast-primality-testing-in-c-sharp#4236870 */
 	public static bool IsPrime(in ulong value)
@@ -27,15 +27,19 @@ public static class MillerRabin
 			default:
 				if (value % 2 == 0 || value % 3 == 0)
 					return false;
-				break;
-		}
 
+				return IsPrimeInternal(in value);
+		}
+	}
+
+	public static bool IsPrimeInternal(in ulong value)
+	{
 		ReadOnlySpan<ulong> ar
-		= value < 4759123141UL
-		? (ReadOnlySpan<ulong>)AR1
-		: value < 341550071728321UL
-		? (ReadOnlySpan<ulong>)AR2
-		: (ReadOnlySpan<ulong>)AR3;
+			= value < 4759123141UL
+			? AR1.Span
+			: value < 341550071728321UL
+			? AR2.Span
+			: AR3.Span;
 
 		var d = value - 1;
 		var s = 0;

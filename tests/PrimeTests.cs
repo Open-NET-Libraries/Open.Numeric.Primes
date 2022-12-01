@@ -25,6 +25,14 @@ public static class PrimeNumbers
 		Assert.True(instance.IsPrime(value));
 	}
 
+	[Theory]
+	[InlineData(2130706433)]
+	[InlineData(8592868089022906369)]
+	public static void OptimizedTest(ulong value)
+	{
+		Assert.True(Prime.Numbers.IsPrime(value));
+	}
+
 	static void PrimesTest32<T>()
 		where T : PrimalityBase<uint>, new()
 	{
@@ -32,14 +40,14 @@ public static class PrimeNumbers
 		var instance = new T();
 		foreach (var p in instance.Take(TrialDivision.FirstKnown.Length))
 		{
-			Assert.Equal(TrialDivision.FirstKnown[i++], p);//, "Numbers did not match for " + typeof(T));
+			Assert.Equal(TrialDivision.U32.FirstKnown32[i++], p);//, "Numbers did not match for " + typeof(T));
 		}
 
 		i = 0;
 		foreach (var p in instance.InParallel()
 			.Take(TrialDivision.FirstKnown.Length))
 		{
-			Assert.Equal(TrialDivision.FirstKnown[i++], p);//, "Numbers in parallel did not match for " + typeof(T));
+			Assert.Equal(TrialDivision.U32.FirstKnown32[i++], p);//, "Numbers in parallel did not match for " + typeof(T));
 		}
 	}
 
@@ -50,14 +58,14 @@ public static class PrimeNumbers
 		var instance = new T();
 		foreach (var p in instance.Take(TrialDivision.FirstKnown.Length))
 		{
-			Assert.Equal(TrialDivision.FirstKnown[i++], p);//, "Numbers did not match for " + typeof(T));
+			Assert.Equal(TrialDivision.U32.FirstKnown32[i++], p);//, "Numbers did not match for " + typeof(T));
 		}
 
 		i = 0;
 		foreach (var p in instance.InParallel()
 			.Take(TrialDivision.FirstKnown.Length))
 		{
-			Assert.Equal(TrialDivision.FirstKnown[i++], p);//, "Numbers in parallel did not match for " + typeof(T));
+			Assert.Equal(TrialDivision.U32.FirstKnown32[i++], p);//, "Numbers in parallel did not match for " + typeof(T));
 		}
 	}
 

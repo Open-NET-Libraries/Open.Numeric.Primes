@@ -9,21 +9,29 @@ namespace Open.Numeric.Primes;
 
 public static class TrialDivision
 {
-	public static readonly ImmutableArray<ushort> FirstKnown
-		= ImmutableArray.Create<ushort>(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541);
+	public static readonly ImmutableArray<int> FirstKnown
+		= ImmutableArray.Create(
+			2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107,
+			109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229,
+			233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359,
+			367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491,
+			499, 503, 509, 521, 523, 541);
 
 	//static readonly ushort LastKnown = FirstKnown.Last();
 
 	public class U32 : PrimalityU32Base
 	{
-		public static readonly ImmutableArray<uint> FirstKnown32 = FirstKnown.Select(Convert.ToUInt32).ToImmutableArray();
+		public static readonly ImmutableArray<uint> FirstKnown32
+			= FirstKnown.Select(Convert.ToUInt32).ToImmutableArray();
 
 		/// <inheritdoc />
 		public override ParallelQuery<uint> InParallel(in uint staringAt, ushort? degreeOfParallelism = null)
 		{
 			var sa = staringAt;
-			var tests = AllNumbers().SkipWhile(v => v < sa) // This is the difference.
-				.AsParallel().AsOrdered();
+			var tests = AllNumbers()
+				.SkipWhile(v => v < sa) // This is the difference.
+				.AsParallel()
+				.AsOrdered();
 
 			if (degreeOfParallelism.HasValue)
 				tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
@@ -59,7 +67,7 @@ public static class TrialDivision
 				var pN = known.First;
 				do
 				{
-					var p = pN.Value;
+					var p = pN!.Value;
 					var stop = n / last; // The list of possibilities shrinks for each test.
 					if (p > stop)
 					{
@@ -127,7 +135,8 @@ public static class TrialDivision
 
 	public class U64 : PrimalityU64Base
 	{
-		public static readonly ImmutableArray<ulong> FirstKnown64 = FirstKnown.Select(Convert.ToUInt64).ToImmutableArray();
+		public static readonly ImmutableArray<ulong> FirstKnown64
+			= FirstKnown.Select(Convert.ToUInt64).ToImmutableArray();
 
 		/// <inheritdoc />
 		public override ParallelQuery<ulong> InParallel(in ulong staringAt, ushort? degreeOfParallelism = null)
@@ -172,7 +181,7 @@ public static class TrialDivision
 				var pN = known.First;
 				do
 				{
-					var p = pN.Value;
+					var p = pN!.Value;
 					var stop = n / last; // The list of possibilities shrinks for each test.
 					if (p > stop)
 					{
@@ -199,7 +208,6 @@ public static class TrialDivision
 		/// Returns an enumerable that will iterate every prime starting at the starting value.
 		/// </summary>
 		/// <param name="startingAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-		/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
 		public override IEnumerable<ulong> StartingAt(ulong startingAt)
 			=> AllNumbers().SkipWhile(n => n < startingAt);
 
@@ -213,7 +221,6 @@ public static class TrialDivision
 			/// <summary>
 			/// Returns a memoized enumerable that will iterate every prime starting at the starting value.
 			/// </summary>
-			/// <returns>A memoized enumerable that will iterate every prime starting at the starting value</returns>
 			protected override IEnumerable<ulong> AllNumbers()
 				=> LazyInitializer
 					.EnsureInitialized(ref _memoized,

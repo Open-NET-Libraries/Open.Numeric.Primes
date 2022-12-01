@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net7</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<AnalysisLevel>latest</AnalysisLevel>
@@ -45,11 +45,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="Open.Collections" Version="3.0.0" />
+		<PackageReference Include="Open.Collections" Version="3.1.2" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-		<PackageReference Include="System.Memory" Version="4.5.4" />
+		<PackageReference Include="System.Memory" Version="4.5.5" />
 	</ItemGroup>
 
 </Project>

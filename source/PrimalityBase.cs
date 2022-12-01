@@ -14,24 +14,21 @@ public abstract class PrimalityBase<T> : IEnumerable<T>
 	protected abstract IEnumerable<T> ValidPrimeTests(T startingAt);
 
 	/// <summary>
-	/// Returns true if the value provided is prime.
+	/// Returns <see langword="true"/> if the value provided is prime.
 	/// </summary>
 	/// <param name="value">The value to validate.</param>
-	/// <returns>True if the value provided is prime</returns>
 	public abstract bool IsPrime(in T value);
 
 	/// <summary>
-	/// Returns true if the value provided is prime.
+	/// Returns <see langword="true"/> if the value provided is prime.
 	/// </summary>
 	/// <param name="value">The value to validate.</param>
-	/// <returns>True if the value provided is prime</returns>
 	public bool IsPrime(T value) => IsPrime(in value);
 
 	/// <summary>
 	/// Returns an enumerable that will iterate every prime starting at the starting value.
 	/// </summary>
 	/// <param name="value">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-	/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
 	public virtual IEnumerable<T> StartingAt(T value)
 		=> ValidPrimeTests(value)
 			.Where(IsPrime);
@@ -66,7 +63,6 @@ public abstract class PrimalityBase<T> : IEnumerable<T>
 	/// First multiple is always 0, 1 or -1.
 	/// </summary>
 	/// <param name="value">The value to factorize.</param>
-	/// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
 	public abstract IEnumerable<T> Factors(T value);
 
 	/// <summary>
@@ -85,7 +81,6 @@ public abstract class PrimalityBase<T> : IEnumerable<T>
 	/// Finds the next prime number after the number given.
 	/// </summary>
 	/// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
-	/// <returns>The next prime after the number provided.</returns>s
 	public abstract T Next(in T after);
 
 	/// <inheritdoc />
@@ -123,7 +118,6 @@ public abstract class PrimalityU32Base : PrimalityBase<uint>
 	/// Returns an enumerable that will iterate every prime starting at the starting value.
 	/// </summary>
 	/// <param name="value">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.  Passing a negative number here will produce a negative set of prime numbers.</param>
-	/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
 	public IEnumerable<int> StartingAt(int value)
 	{
 		var absStart = (uint)Math.Abs(value);
@@ -201,7 +195,6 @@ public abstract class PrimalityU32Base : PrimalityBase<uint>
 	/// First multiple is always 0, 1 or -1.
 	/// </summary>
 	/// <param name="value">The value to factorize.</param>
-	/// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
 	public IEnumerable<int> Factors(int value)
 	{
 		if (value != 0L)
@@ -246,7 +239,6 @@ public abstract class PrimalityU32Base : PrimalityBase<uint>
 	/// Finds the next prime number after the number given.
 	/// </summary>
 	/// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
-	/// <returns>The next prime after the number provided.</returns>
 	public int Next(in int after)
 		=> StartingAt(after + 1).First();
 
@@ -273,10 +265,9 @@ public abstract class PrimalityU32Base : PrimalityBase<uint>
 	}
 
 	/// <summary>
-	/// Returns true if the value provided is prime.
+	/// Returns <see langword="true"/> if the value provided is prime.
 	/// </summary>
 	/// <param name="value">The value to validate.</param>
-	/// <returns>True if the value provided is prime</returns>
 	public bool IsPrime(int value)
 		=> IsPrime(Convert.ToUInt32(Math.Abs(value)));
 
@@ -315,7 +306,6 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 	/// Returns an enumerable that will iterate every prime starting at the starting value.
 	/// </summary>
 	/// <param name="value">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.  Passing a negative number here will produce a negative set of prime numbers.</param>
-	/// <returns>An enumerable that will iterate every prime starting at the starting value</returns>
 	public IEnumerable<long> StartingAt(long value)
 	{
 		var absStart = (ulong)Math.Abs(value);
@@ -393,7 +383,6 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 	/// First multiple is always 0, 1 or -1.
 	/// </summary>
 	/// <param name="value">The value to factorize.</param>
-	/// <returns>An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.</returns>
 	public IEnumerable<long> Factors(long value)
 	{
 		if (value != 0L)
@@ -438,7 +427,6 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 	/// Finds the next prime number after the number given.
 	/// </summary>
 	/// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
-	/// <returns>The next prime after the number provided.</returns>
 	public long Next(in long after)
 		=> StartingAt(after + 1).First();
 
@@ -464,25 +452,19 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 		}
 	}
 
-	/// <summary>
-	/// Returns true if the value provided is prime.
-	/// </summary>
-	/// <param name="value">The value to validate.</param>
-	/// <returns>True if the value provided is prime</returns>
+	/// <inheritdoc cref="IsPrime(in ulong)" />
 	public bool IsPrime(in int value)
 		=> IsPrime(Convert.ToUInt64(Math.Abs(value)));
 
-	/// <summary>
-	/// Returns true if the value provided is prime.
-	/// </summary>
-	/// <param name="value">The value to validate.</param>
-	/// <returns>True if the value provided is prime</returns>
+	/// <inheritdoc cref="IsPrime(in ulong)" />
+	public bool IsPrime(in uint value)
+		=> IsPrime(Convert.ToUInt64(value));
+
+	/// <inheritdoc cref="IsPrime(in ulong)" />
 	public bool IsPrime(in long value)
 		=> IsPrime(Convert.ToUInt64(Math.Abs(value)));
 
-	/// <summary>
-	/// Should only check for primes that aren't divisible by 2 or 3.
-	/// </summary>
+	/// <inheritdoc cref="IsPrime(in ulong)" />
 	protected abstract bool IsPrimeInternal(in ulong value);
 }
 

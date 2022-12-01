@@ -52,7 +52,7 @@ public static class Polynomial
 	}
 
 	/// <summary>
-	/// Returns true if the value provided is prime.
+	/// Returns <see langword="true"/> if the value provided is prime.
 	/// </summary>
 	/// <param name="value">The value to validate.</param>
 	/// <returns>True if the value provided is prime</returns>
@@ -79,7 +79,7 @@ public static class Polynomial
 	}
 
 	/// <summary>
-	/// Returns true if the value provided is prime.
+	/// Returns <see langword="true"/> if the value provided is prime.
 	/// </summary>
 	/// <param name="value">The value to validate.</param>
 	/// <returns>True if the value provided is prime</returns>
@@ -105,7 +105,7 @@ public static class Polynomial
 	}
 
 	/// <summary>
-	/// Returns true if the value provided is prime.
+	/// Returns <see langword="true"/> if the value provided is prime.
 	/// </summary>
 	/// <param name="value">The value to validate.</param>
 	/// <returns>True if the value provided is prime</returns>
@@ -153,19 +153,19 @@ public static class Polynomial
 	{
 		// ReSharper disable once MemberHidesStaticFromOuterClass
 		protected override bool IsPrimeInternal(uint value)
-		=> Polynomial.IsPrimeInternal(value);
+			=> Polynomial.IsPrimeInternal(value);
 	}
 
 	public class U64 : PrimalityU64Base
 	{
 		// ReSharper disable once MemberHidesStaticFromOuterClass
 		protected override bool IsPrimeInternal(in ulong value)
-		=> Polynomial.IsPrimeInternal(in value);
+			=> Polynomial.IsPrimeInternal(in value);
 	}
 
 	public class BigInt : PrimalityBigIntBase
 	{
 		protected override bool IsPrimeInternal(in BigInteger value)
-		=> Polynomial.IsPrime(in value, 6UL);
+			=> Polynomial.IsPrime(in value, 6UL);
 	}
 }
