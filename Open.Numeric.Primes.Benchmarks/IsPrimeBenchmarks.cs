@@ -7,13 +7,16 @@ namespace Open.Numeric.Primes.Benchmarks;
 [MemoryDiagnoser]
 public class IsPrimeBenchmarks
 {
-	static readonly ReadOnlyMemory<int> IntNumbers = Enumerable.Range(0, 1000000).ToArray();
-	static readonly ReadOnlyMemory<uint> UIntNumbers = Enumerable.Range(0, 1000000).Select(i => (uint)i).ToArray();
-	static readonly ReadOnlyMemory<long> LongNumbers = Enumerable.Range(0, 1000000).Select(i => (long)i).ToArray();
-	static readonly ReadOnlyMemory<ulong> ULongNumbers = Enumerable.Range(0, 1000000).Select(i => (ulong)i).ToArray();
-	static readonly ReadOnlyMemory<double> DoubleNumbers = Enumerable.Range(0, 1000000).Select(i => (double)i).ToArray();
-	static readonly ReadOnlyMemory<decimal> DecimalNumbers = Enumerable.Range(0, 1000000).Select(i => (decimal)i).ToArray();
-	static readonly ReadOnlyMemory<BigInteger> BigIntNumbers = Enumerable.Range(0, 1000000).Select(i => (BigInteger)i).ToArray();
+	const int Size = 10000000;
+	static readonly IEnumerable<int> Values = Enumerable.Range(0, Size);
+
+	static readonly ReadOnlyMemory<int> IntNumbers = Values.ToArray();
+	static readonly ReadOnlyMemory<uint> UIntNumbers = Values.Select(i => (uint)i).ToArray();
+	static readonly ReadOnlyMemory<long> LongNumbers = Values.Select(i => (long)i).ToArray();
+	static readonly ReadOnlyMemory<ulong> ULongNumbers = Values.Select(i => (ulong)i).ToArray();
+	static readonly ReadOnlyMemory<double> DoubleNumbers = Values.Select(i => (double)i).ToArray();
+	static readonly ReadOnlyMemory<decimal> DecimalNumbers = Values.Select(i => (decimal)i).ToArray();
+	static readonly ReadOnlyMemory<BigInteger> BigIntNumbers = Values.Select(i => (BigInteger)i).ToArray();
 
 	static readonly Optimized Numbers = Prime.Numbers;
 
@@ -33,7 +36,7 @@ public class IsPrimeBenchmarks
 	{
 		var n = UIntNumbers.Span;
 		var len = n.Length;
-		for(var i = 0; i < len; i++)
+		for (var i = 0; i < len; i++)
 		{
 			_ = Numbers.IsPrime(n[i]);
 		}
@@ -51,6 +54,18 @@ public class IsPrimeBenchmarks
 	}
 
 	[Benchmark]
+	public void LongRefIsPrime()
+	{
+		var n = LongNumbers.Span;
+		var len = n.Length;
+		for (var i = 0; i < len; i++)
+		{
+			ref readonly var v = ref n[i];
+			_ = Numbers.IsPrime(in v);
+		}
+	}
+
+	[Benchmark]
 	public void ULongIsPrime()
 	{
 		var n = ULongNumbers.Span;
@@ -62,13 +77,14 @@ public class IsPrimeBenchmarks
 	}
 
 	[Benchmark]
-	public void ULongInIsPrime()
+	public void ULongRefIsPrime()
 	{
 		var n = ULongNumbers.Span;
 		var len = n.Length;
 		for (var i = 0; i < len; i++)
 		{
-			_ = Numbers.IsPrime(in n[i]);
+			ref readonly var v = ref n[i];
+			_ = Numbers.IsPrime(in v);
 		}
 	}
 
@@ -102,6 +118,52 @@ public class IsPrimeBenchmarks
 		for (var i = 0; i < len; i++)
 		{
 			_ = n[i].IsPrime();
+		}
+	}
+
+	[Benchmark]
+	public void LongPolynomialIsPrime()
+	{
+		var n = LongNumbers.Span;
+		var len = n.Length;
+		for (var i = 0; i < len; i++)
+		{
+			_ = Polynomial.IsPrime(n[i]);
+		}
+	}
+
+	[Benchmark]
+	public void LongRefPolynomialIsPrime()
+	{
+		var n = LongNumbers.Span;
+		var len = n.Length;
+		for (var i = 0; i < len; i++)
+		{
+			ref readonly var v = ref n[i];
+			_ = Polynomial.IsPrime(in v);
+		}
+	}
+
+	[Benchmark]
+	public void DecimalPolynomialIsPrime()
+	{
+		var n = DecimalNumbers.Span;
+		var len = n.Length;
+		for (var i = 0; i < len; i++)
+		{
+			_ = Polynomial.IsPrime(in n[i]);
+		}
+	}
+
+	[Benchmark]
+	public void DecimalRefPolynomialIsPrime()
+	{
+		var n = DecimalNumbers.Span;
+		var len = n.Length;
+		for (var i = 0; i < len; i++)
+		{
+			ref readonly var v = ref n[i];
+			_ = Polynomial.IsPrime(in v);
 		}
 	}
 }

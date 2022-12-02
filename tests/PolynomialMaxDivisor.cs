@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
+﻿using System.Numerics;
 using Xunit;
 
 namespace Open.Numeric.Primes.Tests;
@@ -23,9 +20,8 @@ public static class PolynomialMaxDivisor
 				break;
 			}
 		}
-#pragma warning disable xUnit2000 // Constants and literals should be the expected argument
+
 		Assert.Equal(divisor, 65536);
-#pragma warning restore xUnit2000 // Constants and literals should be the expected argument
 	}
 
 	[Fact]
@@ -43,8 +39,7 @@ public static class PolynomialMaxDivisor
 				break;
 			}
 		}
-#pragma warning disable xUnit2000 // Constants and literals should be the expected argument
+
 		Assert.Equal(divisor, 4294967296);
-#pragma warning restore xUnit2000 // Constants and literals should be the expected argument
 	}
 }

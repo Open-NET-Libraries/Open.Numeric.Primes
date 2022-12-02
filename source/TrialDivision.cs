@@ -39,12 +39,16 @@ public static class TrialDivision
 			return tests.Where(v => IsPrime(in v));
 		}
 
+
+		protected override bool IsPrimeInternal(in uint value)
+			=> IsPrimeInternal(value);
+
 		protected override bool IsPrimeInternal(uint value)
 		{
 			var sqr = (uint)Math.Sqrt(value);
 			for (var p = 5U; p <= sqr; p += 2U)
 			{
-				if (value % p == 0) return false;
+				if (value % p == 0U) return false;
 			}
 
 			return true;

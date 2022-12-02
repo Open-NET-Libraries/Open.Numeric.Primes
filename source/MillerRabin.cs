@@ -131,7 +131,7 @@ public static class MillerRabin
 	/* Based on: https://rosettacode.org/wiki/Miller%E2%80%93Rabin_primality_test#C.23 */
 	static bool IsProbablePrimeInternal(in BigInteger source, int certainty = 10)
 	{
-		if (source == BIG.TWO || source == BIG.THREE)
+		if (source == Big.Two || source == Big.Three)
 			return true;
 
 		if (source.IsEven)

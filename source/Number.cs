@@ -4,6 +4,32 @@ using System.Runtime.CompilerServices;
 
 namespace Open.Numeric.Primes;
 
+#if NET7_0_OR_GREATER
+public static class Number<T>
+	where T : notnull, INumber<T>
+{
+	internal static readonly T Two = T.One + T.One;
+	internal static readonly T Three = T.One + Two;
+	internal static readonly T Six = Three + Three;
+
+	//[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
+	//public sealed override bool IsPrime(in T value)
+	//{
+	//	if (T.IsZero(value) || value == T.One)
+	//		return false;
+
+	//	if (value == Two || value == Three)
+	//		return true;
+
+	//	if (T.IsZero(value % Two) || T.IsZero(value % Three))
+	//		return false;
+
+	//	return IsPrimeInternal(in value);
+	//}
+
+}
+#endif
+
 /// <summary>
 /// A useful set of prime detection functions.
 /// Unique overloads for certain number types including BigInteger in order to ensure efficiency and compiler optimizations.
@@ -43,8 +69,7 @@ public static class Number
 	/// <inheritdoc cref="IsPrime(ulong)"/>
 	public static bool IsPrime(in double value)
 	{
-		// ReSharper disable once CompareOfFloatsByEqualityOperator
-		if (value % 1 != 0)
+		if (value % 1d != 0d)
 			return false;
 
 		var abs = Math.Abs(value);

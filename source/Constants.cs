@@ -2,8 +2,9 @@
 
 namespace Open.Numeric.Primes;
 
-internal static class BIG
+internal static class Big
 {
-	public static readonly BigInteger TWO = 2;
-	public static readonly BigInteger THREE = 3;
+	public static readonly BigInteger Two = 2;
+	public static readonly BigInteger Three = 3;
+	public static readonly BigInteger Six = 6;
 }

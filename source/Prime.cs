@@ -204,7 +204,7 @@ public static class Prime
 				var retryIndex = -1;
 
 			retry:
-				var i = 0; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iteratons.
+				var i = 0; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iterations.
 				foreach (var e in factors)
 				{
 					if (maxFactor < i)
@@ -286,7 +286,7 @@ public static class Prime
 				var retryIndex = -1;
 
 			retry:
-				var i = 0; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iteratons.
+				var i = 0; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iterations.
 				foreach (var e in factors)
 				{
 					if (maxFactor < i)

@@ -10,8 +10,8 @@ public class Optimized : PrimalityU64Base
 
 	protected override bool IsPrimeInternal(in ulong value)
 		=> value < PERF_PIVOT
-			? Polynomial.IsPrimeInternal(Convert.ToUInt32(value))
-			: MillerRabin.IsPrime(in value);
+			? Polynomial.IsULongPrime(in value)
+			: MillerRabin.IsPrimeInternal(in value);
 
 	public readonly BigInt Big = new();
 
@@ -19,9 +19,9 @@ public class Optimized : PrimalityU64Base
 	{
 		protected override bool IsPrimeInternal(in BigInteger value)
 			=> value > ulong.MaxValue
-				? MillerRabin.IsProbablePrime(in value) && Polynomial.IsPrime(in value, 6)
+				? MillerRabin.IsProbablePrime(in value) && Polynomial.IsBigIntPrime(in value, 6)
 				: value < PERF_PIVOT
-				? Polynomial.IsPrimeInternal(Convert.ToUInt32(value))
+				? Polynomial.IsUIntPrime(Convert.ToUInt32(value))
 				: MillerRabin.IsPrime((ulong)value);
 				// Lucas-Selfridge here? :(
 
