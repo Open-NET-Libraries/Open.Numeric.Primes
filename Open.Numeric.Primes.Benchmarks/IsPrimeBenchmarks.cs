@@ -1,10 +1,12 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Open.Numeric.Primes.Extensions;
 using System.Numerics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Open.Numeric.Primes.Benchmarks;
 
 [MemoryDiagnoser]
+[SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class IsPrimeBenchmarks
 {
 	const int Size = 10000000;

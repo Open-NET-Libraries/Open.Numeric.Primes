@@ -6,26 +6,10 @@ using System.Text;
 
 namespace Open.Numeric.Primes;
 
-public abstract class PrimalityU64Base : PrimalityBase<ulong>
+public abstract class PrimalityU64Base : PrimalityIntegerBase<ulong>
 {
-	// ReSharper disable once OptionalParameterHierarchyMismatch
-	protected override IEnumerable<ulong> ValidPrimeTests(ulong staringAt = 2UL)
-	{
-		var n = staringAt;
-		if (n > 2UL)
-		{
-			if (n % 2UL == 0)
-				n++;
-		}
-		else
-		{
-			yield return 2UL;
-			n = 3UL;
-		}
-
-		for (; n < ulong.MaxValue - 1UL; n += 2UL)
-			yield return n;
-	}
+	protected override IEnumerable<ulong> ValidPrimeTests(in ulong startingAt = 2U)
+		=> Candidates.StartingAt(startingAt);
 
 	/// <inheritdoc />
 	public override IEnumerator<ulong> GetEnumerator()
@@ -38,11 +22,16 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 	public IEnumerable<long> StartingAt(long value)
 	{
 		var absStart = (ulong)Math.Abs(value);
-		var selection = StartingAt(absStart).TakeWhile(v => v < int.MaxValue);
+		var selection = StartingAt(absStart).TakeWhile(v => v < long.MaxValue);
 
 		return value < 0
+#if NET7_0_OR_GREATER
 			? selection.Select(ConvertInt64Negative)
 			: selection.Select(Convert.ToInt64);
+#else
+			? selection.Select(e=>ConvertInt64Negative(e))
+			: selection.Select(e=>Convert.ToInt64(e));
+#endif
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static long ConvertInt64Negative(ulong value)
@@ -59,22 +48,6 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 			yield return new KeyValuePair<ulong, ulong>(count, n);
 		}
 	}
-
-	/// <inheritdoc />
-	public override ParallelQuery<ulong> InParallel(in ulong staringAt, ushort? degreeOfParallelism = null)
-	{
-		var tests = ValidPrimeTests(staringAt)
-			.AsParallel().AsOrdered();
-
-		if (degreeOfParallelism.HasValue)
-			tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
-
-		return tests.Where(IsPrime);
-	}
-
-	/// <inheritdoc />
-	public override ParallelQuery<ulong> InParallel(ushort? degreeOfParallelism = null)
-		=> InParallel(2UL, degreeOfParallelism);
 
 	/// <inheritdoc />
 	public override IEnumerable<ulong> Factors(ulong value)
@@ -114,34 +87,35 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 	/// <param name="value">The value to factorize.</param>
 	public IEnumerable<long> Factors(long value)
 	{
-		if (value != 0L)
+		if (value == 0L)
+			goto exit;
+
+		yield return value < 0L ? -1L : 1L;
+		if (value < 0L) value = Math.Abs(value);
+		if (value == 1L)
+			yield break;
+
+		var last = 1L;
+
+		// For larger numbers, a quick prime check can prevent large iterations.
+		if (!IsFactorable(value))
+			goto exit;
+
+		foreach (var p in StartingAt(2L))
 		{
-			yield return value < 0L ? -1L : 1L;
-			if (value < 0L) value = Math.Abs(value);
-			if (value == 1L)
-				yield break;
-
-			var last = 1L;
-
-			// For larger numbers, a quick prime check can prevent large iterations.
-			if (IsFactorable(value))
+			var stop = value / last; // The list of possibilities shrinks for each test.
+			if (p > stop) break; // Exceeded possibilities? 
+			while ((value % p) == 0)
 			{
-				foreach (var p in StartingAt(2L))
-				{
-					var stop = value / last; // The list of possibilities shrinks for each test.
-					if (p > stop) break; // Exceeded possibilities? 
-					while ((value % p) == 0)
-					{
-						value /= p;
-						yield return p;
-						if (value == 1) yield break;
-					}
-
-					last = p;
-				}
+				value /= p;
+				yield return p;
+				if (value == 1) yield break;
 			}
+
+			last = p;
 		}
 
+	exit:
 		yield return value;
 	}
 
@@ -159,7 +133,7 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 	/// </summary>
 	/// <param name="after">The excluded lower boundary to start with.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.</param>
 	public long Next(in long after)
-		=> StartingAt(after + 1).First();
+		=> StartingAt(after + 1L).First();
 
 	/// <inheritdoc />
 	public sealed override bool IsPrime(in ulong value)
@@ -194,5 +168,4 @@ public abstract class PrimalityU64Base : PrimalityBase<ulong>
 	/// <inheritdoc cref="IsPrime(in ulong)" />
 	public bool IsPrime(in long value)
 		=> IsPrime(Convert.ToUInt64(Math.Abs(value)));
-
 }

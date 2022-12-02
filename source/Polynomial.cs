@@ -200,7 +200,6 @@ public static class Polynomial
 		=> IsTPrime(in value, Number<T>.Six);
 #endif
 
-
 	public class U32 : PrimalityU32Base
 	{
 		// ReSharper disable once MemberHidesStaticFromOuterClass

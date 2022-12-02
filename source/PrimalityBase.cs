@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Open.Numeric.Primes;
@@ -21,25 +19,61 @@ public abstract partial class PrimalityBase<T> : IEnumerable<T>
 
 	protected abstract bool IsPrimeInternal(in T value);
 
+#if NET7_0_OR_GREATER
+	protected virtual IEnumerable<T> ValidPrimeTests(in T startingAt)
+		=> Candidates.StartingAt(in startingAt);
+#else
+	protected abstract IEnumerable<T> ValidPrimeTests(in T startingAt);
+#endif
+
 	/// <summary>
-	/// Returns an enumerable of key-value pairs that will iterate every prime starting at the starting value where the key is the count (index starting at 1) of the set.
-	/// So the first entry is always {Key=1, Value=2}.
+	/// Returns an enumerable that will iterate every prime starting at the starting value.
 	/// </summary>
+	/// <param name="value">
+	/// Allows for skipping ahead any integer
+	/// before checking for inclusive and subsequent primes.
+	/// </param>
+	public virtual IEnumerable<T> StartingAt(in T value)
+		=> ValidPrimeTests(in value)
+#if NET7_0_OR_GREATER
+			.Where(IsPrime);
+#else
+			.Where(v => IsPrime(v));
+#endif
+
+	/// <summary>
+	/// Returns key-value pairs of every prime starting where the key is the index (starting at 1) of the set.
+	/// </summary>
+	/// <remarks>The first entry is always {Key=1, Value=2}.</remarks>
 	public abstract IEnumerable<KeyValuePair<T, T>> Indexed();
 
 	/// <summary>
 	/// Returns a parallel enumerable that will iterate every prime starting at the starting value.
 	/// </summary>
-	/// <param name="staringAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-	/// <param name="degreeOfParallelism">Operates in parallel unless 1 is specified.</param>
+	/// <param name="startingAt">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
+	/// <param name="degreeOfParallelism">The optional maximum degree of parallelism.</param>
 	/// <returns>An ordered parallel enumerable of primes.</returns>
-	public abstract ParallelQuery<T> InParallel(in T staringAt, ushort? degreeOfParallelism = null);
+	public virtual ParallelQuery<T> InParallel(in T startingAt, int? degreeOfParallelism = null)
+	{
+		Debug.Assert(!degreeOfParallelism.HasValue || degreeOfParallelism >= 0);
 
-	/// <inheritdoc cref="InParallel(in T, ushort?)"/>
-	/// <summary>
-	/// Returns a parallel enumerable that will iterate every prime.
-	/// </summary>
-	public abstract ParallelQuery<T> InParallel(ushort? degreeOfParallelism = null);
+		var tests = ValidPrimeTests(in startingAt)
+			.AsParallel().AsOrdered();
+
+		if (degreeOfParallelism > 1)
+			tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
+
+		return tests
+#if NET7_0_OR_GREATER
+			.Where(IsPrime);
+#else
+			.Where(v => IsPrime(v));
+#endif
+	}
+
+	/// <inheritdoc cref="InParallel(in T, int?)"/>
+	public ParallelQuery<T> InParallel(int? degreeOfParallelism = null)
+		=> InParallel(default!, degreeOfParallelism);
 
 	protected virtual bool IsFactorable(in T value)
 		=> !IsPrime(in value);
@@ -51,7 +85,7 @@ public abstract partial class PrimalityBase<T> : IEnumerable<T>
 	/// </summary>
 	/// <param name="value">The value to factorize.</param>
 	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
-	public IEnumerable<T> Factors(in T value, bool omitOneAndValue)
+	public IEnumerable<T> Factors(T value, bool omitOneAndValue)
 		=> omitOneAndValue
 			? Factors(value).Skip(1).TakeWhile(v => !value.Equals(v))
 			: Factors(value);

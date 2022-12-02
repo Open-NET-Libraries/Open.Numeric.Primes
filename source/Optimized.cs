@@ -26,11 +26,11 @@ public class Optimized : PrimalityU64Base
 				// Lucas-Selfridge here? :(
 
 		/// <inheritdoc />
-		public override ParallelQuery<BigInteger> InParallel(in BigInteger staringAt, ushort? degreeOfParallelism = null)
-			=> staringAt >= ulong.MaxValue
-				? base.InParallel(in staringAt, degreeOfParallelism)
+		public override ParallelQuery<BigInteger> InParallel(in BigInteger startingAt, int? degreeOfParallelism = null)
+			=> startingAt >= ulong.MaxValue
+				? base.InParallel(in startingAt, degreeOfParallelism)
 				: new Optimized()
-					.InParallel((ulong)staringAt, degreeOfParallelism)
+					.InParallel((ulong)startingAt, degreeOfParallelism)
 					.Select(u => new BigInteger(u))
 					.Concat(base.InParallel(ulong.MaxValue, degreeOfParallelism));
 	}

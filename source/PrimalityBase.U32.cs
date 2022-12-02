@@ -2,33 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Open.Numeric.Primes;
 
 public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 {
-	protected IEnumerable<uint> ValidPrimeTests(uint staringAt = 2U)
-	{
-		var n = staringAt;
-		if (n > 2U)
-		{
-			if (n % 2U == 0)
-				n++;
-		}
-		else
-		{
-			yield return 2U;
-			n = 3U;
-		}
-
-		for (; n < uint.MaxValue - 1U; n += 2U)
-			yield return n;
-	}
-
-	// ReSharper disable once OptionalParameterHierarchyMismatch
-	protected override IEnumerable<uint> ValidPrimeTests(in uint staringAt = 2U)
-		=> ValidPrimeTests(staringAt);
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	protected override IEnumerable<uint> ValidPrimeTests(in uint startingAt = 2U)
+		=> Candidates.StartingAt(startingAt);
 
 	/// <inheritdoc />
 	public override IEnumerator<uint> GetEnumerator()
@@ -44,8 +25,13 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 		var selection = StartingAt(absStart).TakeWhile(v => v < int.MaxValue);
 
 		return value < 0
+#if NET7_0_OR_GREATER
 			? selection.Select(ConvertInt32Negative)
 			: selection.Select(Convert.ToInt32);
+#else
+			? selection.Select(e=>ConvertInt32Negative(e))
+			: selection.Select(e=>Convert.ToInt32(e));
+#endif
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static int ConvertInt32Negative(uint value)
@@ -64,49 +50,34 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 	}
 
 	/// <inheritdoc />
-	public override ParallelQuery<uint> InParallel(in uint staringAt, ushort? degreeOfParallelism = null)
-	{
-		var tests = ValidPrimeTests(staringAt)
-			.AsParallel().AsOrdered();
-
-		if (degreeOfParallelism.HasValue)
-			tests = tests.WithDegreeOfParallelism(degreeOfParallelism.Value);
-
-		return tests.Where(IsPrime);
-	}
-
-	/// <inheritdoc />
-	public override ParallelQuery<uint> InParallel(ushort? degreeOfParallelism = null)
-		=> InParallel(2U, degreeOfParallelism);
-
-	/// <inheritdoc />
 	public override IEnumerable<uint> Factors(uint value)
 	{
-		if (value != 0U)
+		if (value == 0U)
+			goto exit;
+
+		yield return 1U;
+		if (value == 1U) yield break;
+
+		// For larger numbers, a quick prime check can prevent large iterations.
+		if (!IsFactorable(value))
+			goto exit;
+
+		var last = 1U;
+		foreach (var p in this)
 		{
-			yield return 1U;
-			if (value == 1U) yield break;
-			var last = 1U;
-
-			// For larger numbers, a quick prime check can prevent large iterations.
-			if (IsFactorable(value))
+			var stop = value / last; // The list of possibilities shrinks for each test.
+			if (p > stop) break; // Exceeded possibilities? 
+			while ((value % p) == 0U)
 			{
-				foreach (var p in this)
-				{
-					var stop = value / last; // The list of possibilities shrinks for each test.
-					if (p > stop) break; // Exceeded possibilities? 
-					while ((value % p) == 0U)
-					{
-						value /= p;
-						yield return p;
-						if (value == 1U) yield break;
-					}
-
-					last = p;
-				}
+				value /= p;
+				yield return p;
+				if (value == 1U) yield break;
 			}
+
+			last = p;
 		}
 
+	exit:
 		yield return value;
 	}
 
@@ -116,37 +87,9 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 	/// </summary>
 	/// <param name="value">The value to factorize.</param>
 	public IEnumerable<int> Factors(int value)
-	{
-		if (value != 0L)
-		{
-			yield return value < 0 ? -1 : 1;
-			if (value < 0) value = Math.Abs(value);
-			if (value == 1)
-				yield break;
-
-			var last = 1;
-
-			// For larger numbers, a quick prime check can prevent large iterations.
-			if (IsFactorable(value))
-			{
-				foreach (var p in StartingAt(2))
-				{
-					var stop = value / last; // The list of possibilities shrinks for each test.
-					if (p > stop) break; // Exceeded possibilities? 
-					while ((value % p) == 0)
-					{
-						value /= p;
-						yield return p;
-						if (value == 1) yield break;
-					}
-
-					last = p;
-				}
-			}
-		}
-
-		yield return value;
-	}
+		=> value < 0
+		? Factors(-value).Select(e=>-e)
+		: Factors(value);
 
 	protected virtual bool IsFactorable(in int value)
 		=> !IsPrime(in value);
@@ -182,7 +125,7 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 				if (value % 2U == 0 || value % 3U == 0)
 					return false;
 
-				return IsPrimeInternal(value);
+				return IsPrimeInternal(in value);
 		}
 	}
 
@@ -190,8 +133,10 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 	/// Returns <see langword="true"/> if the value provided is prime.
 	/// </summary>
 	/// <param name="value">The value to validate.</param>
-	public bool IsPrime(int value)
-		=> IsPrime(Convert.ToUInt32(Math.Abs(value)));
+	public bool IsPrime(in int value)
+		=> value < 0
+			? IsPrime((uint)-value)
+			: IsPrime((uint)value);
 
 	/// <summary>
 	/// Should only check for primes that aren't divisible by 2 or 3.

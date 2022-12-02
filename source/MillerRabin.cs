@@ -25,7 +25,7 @@ public static class MillerRabin
 				return true;
 
 			default:
-				if (value % 2 == 0 || value % 3 == 0)
+				if (value % 2UL == 0 || value % 3UL == 0)
 					return false;
 
 				return IsPrimeInternal(in value);

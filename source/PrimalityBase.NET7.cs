@@ -33,66 +33,6 @@ public abstract partial class PrimalityBase<T>
 		return IsPrimeInternal(in value);
 	}
 
-	[Pure]
-	private static IEnumerable<TN> ValidPrimeTestsPos<TN>(TN n)
-		where TN : INumber<TN>
-	{
-		Debug.Assert(!TN.IsNegative(n));
-
-		var two = Number<TN>.Two;
-
-		if (n > two)
-		{
-			if (TN.IsEvenInteger(n))
-				n++;
-		}
-		else
-		{
-			yield return two;
-			n = Number<TN>.Three;
-		}
-
-		while (TN.IsPositive(n))
-		{
-			yield return n;
-			n += two;
-		}
-	}
-
-	[Pure]
-	private static IEnumerable<TN> ValidPrimeTestsNeg<TN>(TN n)
-		where TN : INumber<TN>
-	{
-		Debug.Assert(!TN.IsPositive(n));
-
-		var two = -Number<TN>.Two;
-
-		if (n < two)
-		{
-			if (TN.IsEvenInteger(n))
-				n--;
-		}
-		else
-		{
-			yield return two;
-			n = -Number<TN>.Three;
-		}
-
-		while (TN.IsNegative(n))
-		{
-			yield return n;
-			n += two;
-		}
-	}
-
-	protected virtual IEnumerable<T> ValidPrimeTests(in T staringAt)
-	{
-		Debug.Assert(T.IsInteger(staringAt));
-		return T.Sign(staringAt) == -1
-			? ValidPrimeTestsNeg(staringAt)
-			: ValidPrimeTestsPos(staringAt);
-	}
-
 	/// <summary>
 	/// Finds the next prime number after the number given.
 	/// </summary>
@@ -101,19 +41,10 @@ public abstract partial class PrimalityBase<T>
 		=> StartingAt(after + T.One).First();
 
 	/// <summary>
-	/// Returns an enumerable that will iterate every prime starting at the starting value.
-	/// </summary>
-	/// <param name="value">Allows for skipping ahead any integer before checking for inclusive and subsequent primes.</param>
-	public virtual IEnumerable<T> StartingAt(in T value)
-		=> ValidPrimeTests(in value)
-			.Where(IsPrime); // Net7 is the first to do this correctly.
-
-	/// <summary>
 	/// Iterates the prime factors of the provided value.
 	/// First multiple is always 0, 1 or -1.
 	/// </summary>
 	/// <param name="value">The value to factorize.</param>
-	[Pure]
 	public virtual IEnumerable<T> Factors(T value)
 	{
 		if (!T.IsInteger(value) || T.IsZero(value) || value == T.One)

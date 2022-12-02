@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
@@ -7,39 +8,14 @@ using System.Text;
 
 namespace Open.Numeric.Primes;
 
-public abstract class PrimalityBigIntBase : PrimalityBase<BigInteger>
+public abstract class PrimalityBigIntBase : PrimalityIntegerBase<BigInteger>
 {
-	protected override IEnumerable<BigInteger> ValidPrimeTests(BigInteger staringAt)
-	{
-		var sign = staringAt.Sign;
-		if (sign == 0) sign = 1;
-		var n = BigInteger.Abs(staringAt);
-
-		if (n > Big.Two)
-		{
-			if (n % Big.Two == 0)
-				n++;
-		}
-		else
-		{
-			yield return sign * Big.Two;
-			n = Big.Three;
-		}
-
-		while (true)
-		{
-			yield return sign * n;
-			n += Big.Two;
-		}
-		// ReSharper disable once IteratorNeverReturns
-	}
-
 	/// <inheritdoc />
 	public override IEnumerator<BigInteger> GetEnumerator()
 		=> StartingAt(BigInteger.One).GetEnumerator();
 
-	protected IEnumerable<BigInteger> ValidPrimeTests()
-		=> ValidPrimeTests(BigInteger.One);
+	protected override IEnumerable<BigInteger> ValidPrimeTests(in BigInteger startingAt)
+		=> Candidates.StartingAt(startingAt);
 
 	/// <inheritdoc />
 	public override IEnumerable<KeyValuePair<BigInteger, BigInteger>> Indexed()
@@ -53,87 +29,74 @@ public abstract class PrimalityBigIntBase : PrimalityBase<BigInteger>
 	}
 
 	/// <inheritdoc />
-	public override ParallelQuery<BigInteger> InParallel(in BigInteger staringAt, ushort? degreeOfParallelism = null)
-	{
-		var testsBig = ValidPrimeTests(staringAt)
-			.AsParallel().AsOrdered();
-
-		if (degreeOfParallelism.HasValue)
-			testsBig = testsBig.WithDegreeOfParallelism(degreeOfParallelism.Value);
-
-		return testsBig.Where(IsPrime);
-	}
-
-	/// <inheritdoc />
-	public override ParallelQuery<BigInteger> InParallel(ushort? degreeOfParallelism = null)
-		=> InParallel(in Big.Two, degreeOfParallelism);
-
-	/// <inheritdoc />
 	public override IEnumerable<BigInteger> Factors(BigInteger value)
 	{
-		if (value != BigInteger.Zero)
+		if (value == BigInteger.Zero)
+			goto exit;
+
+		yield return value.Sign == -1
+			? BigInteger.MinusOne
+			: BigInteger.One;
+
+		if (value.IsOne || value == BigInteger.MinusOne)
+			yield break;
+
+		value = BigInteger.Abs(value);
+		var last = BigInteger.One;
+
+		// For larger numbers, a quick prime check can prevent large iterations.
+		if (!IsFactorable(in value))
+			goto exit;
+
+		foreach (var p in this)
 		{
-			yield return value.Sign == -1
-				? BigInteger.MinusOne
-				: BigInteger.One;
-
-			if (value.IsOne || value == BigInteger.MinusOne)
-				yield break;
-
-			value = BigInteger.Abs(value);
-			var last = BigInteger.One;
-
-			// For larger numbers, a quick prime check can prevent large iterations.
-			if (IsFactorable(in value))
+			var stop = value / last; // The list of possibilities shrinks for each test.
+			if (p > stop) break; // Exceeded possibilities? 
+			while ((value % p) == 0)
 			{
-				foreach (var p in this)
-				{
-					var stop = value / last; // The list of possibilities shrinks for each test.
-					if (p > stop) break; // Exceeded possibilities? 
-					while ((value % p) == 0)
-					{
-						value /= p;
-						yield return p;
-						if (value.IsOne) yield break;
-					}
-
-					last = p;
-				}
+				value /= p;
+				yield return p;
+				if (value.IsOne) yield break;
 			}
+
+			last = p;
 		}
 
+	exit:
 		yield return value;
 	}
 
+#if !NET7_0_OR_GREATER
 	/// <inheritdoc />
 	public override BigInteger Next(in BigInteger after)
 		=> StartingAt(after + BigInteger.One).First();
+#endif
 
-	/// <summary>
-	/// Finds the next prime number after the number given.
-	/// </summary>
-	/// <param name="after">The excluded lower boundary to start with.</param>
-	/// <returns>The next prime after the number provided.</returns>
+	/// <inheritdoc cref="PrimalityBase{T}.Next(in T)" />
 	public BigInteger Next(float after)
-		=> Next((BigInteger)after);
+		=> after < 0
+			? Next((BigInteger) Math.Floor(after))
+			: Next((BigInteger)after);
 
-	/// <summary>
-	/// Finds the next prime number after the number given.
-	/// </summary>
-	/// <param name="after">The excluded lower boundary to start with.</param>
-	/// <returns>The next prime after the number provided.</returns>
-	public BigInteger Next(double after)
-		=> Next((BigInteger)after);
+	/// <inheritdoc cref="PrimalityBase{T}.Next(in T)" />
+	public BigInteger Next(in double after)
+		=> after < 0
+			? Next((BigInteger)Math.Floor(after))
+			: Next((BigInteger)after);
 
 	/// <inheritdoc />
 	public sealed override bool IsPrime(in BigInteger value)
 	{
-		if (value.IsZero)
-			return false;
+		return !value.IsZero
+			&& (value.Sign == -1
+			? value != BigInteger.MinusOne && primeCheck(BigInteger.Abs(value))
+			: !value.IsOne && primeCheck(in value));
 
 		[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
 		bool primeCheck(in BigInteger v)
 		{
+			Debug.Assert(v > BigInteger.Zero);
+
 			if (v == Big.Two || v == Big.Three)
 				return true;
 
@@ -145,11 +108,5 @@ public abstract class PrimalityBigIntBase : PrimalityBase<BigInteger>
 
 			return v % Big.Three != 0 && IsPrimeInternal(in v);
 		}
-
-		return value.Sign == -1
-			? value != BigInteger.MinusOne && primeCheck(BigInteger.Abs(value))
-			: !value.IsOne && primeCheck(in value);
 	}
-
-	protected abstract bool IsPrimeInternal(in BigInteger value);
 }

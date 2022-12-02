@@ -1,19 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Open.Numeric.Primes;
 
-public abstract partial class PrimalityFloatBase<T> : PrimalityBase<T>
+public abstract class PrimalityFloatBase<T> : PrimalityBase<T>
 #if NET7_0_OR_GREATER
-	where T : System.Numerics.IFloatingPoint<T>
+	where T : notnull, System.Numerics.IFloatingPoint<T>
+#else
+	where T : notnull, IEquatable<T>, IComparable<T>
 #endif
 {
 #if NET7_0_OR_GREATER
-	protected override IEnumerable<T> ValidPrimeTests(in T staringAt)
+	protected override IEnumerable<T> ValidPrimeTests(in T startingAt)
 	{
-		var n = T.Sign(staringAt) == -1
-			? T.Floor(staringAt)
-			: T.Ceiling(staringAt);
+		var n = T.Sign(startingAt) == -1
+			? T.Floor(startingAt)
+			: T.Ceiling(startingAt);
 
 		return base.ValidPrimeTests(in n);
 	}
