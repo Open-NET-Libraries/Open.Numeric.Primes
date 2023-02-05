@@ -31,8 +31,8 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 			? selection.Select(ConvertInt32Negative)
 			: selection.Select(Convert.ToInt32);
 #else
-			? selection.Select(e=>ConvertInt32Negative(e))
-			: selection.Select(e=>Convert.ToInt32(e));
+			? selection.Select(e => ConvertInt32Negative(e))
+			: selection.Select(e => Convert.ToInt32(e));
 #endif
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -90,7 +90,7 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 	/// <param name="value">The value to factorize.</param>
 	public IEnumerable<int> Factors(int value)
 		=> value < 0
-		? Factors(-value).Select(e=>-e)
+		? Factors(-value).Select(e => -e)
 		: Factors(value);
 
 	/// <summary>

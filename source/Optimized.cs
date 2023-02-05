@@ -34,7 +34,7 @@ public class Optimized : PrimalityU64Base
 				: value < PERF_PIVOT
 				? Polynomial.IsUIntPrime(Convert.ToUInt32(value))
 				: MillerRabin.IsPrime((ulong)value);
-				// Lucas-Selfridge here? :(
+		// Lucas-Selfridge here? :(
 
 		/// <inheritdoc />
 		public override ParallelQuery<BigInteger> InParallel(in BigInteger startingAt, int? degreeOfParallelism = null)

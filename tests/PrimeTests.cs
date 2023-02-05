@@ -103,7 +103,7 @@ public static class PrimeNumbers
 		var i = new T();
 		firstPrime.Should().BeEquivalentTo(i.Take(KnownLen));
 		firstPrime.Should().BeEquivalentTo(i.InParallel().Take(KnownLen));
-		if(i is not TrialDivision.U64.Memoized)
+		if (i is not TrialDivision.U64.Memoized)
 			U64M.Take(MaxConfirm).Should().BeEquivalentTo(i.Take(MaxConfirm));
 
 		foreach (var p in firstPrime)

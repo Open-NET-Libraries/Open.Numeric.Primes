@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Open.Numeric.Primes.Extensions;
-using System.Numerics;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace Open.Numeric.Primes.Benchmarks;
 

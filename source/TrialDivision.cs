@@ -183,7 +183,7 @@ public static class TrialDivision
 					return FirstKnown.Span.BinarySearch(value) != -1;
 
 				var sqr = Math.Sqrt(value);
-				foreach(var p in AllPrimes())
+				foreach (var p in AllPrimes())
 				{
 					if (p > sqr) break;
 					if (value % p == 0U)

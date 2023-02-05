@@ -1,6 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
 using System.Numerics;
-using System.Diagnostics.CodeAnalysis;
 using static Open.Numeric.Primes.Benchmarks.DiscoveryBenchmarks;
 
 namespace Open.Numeric.Primes.Benchmarks;

@@ -76,7 +76,7 @@ public abstract class PrimalityBigIntBase : PrimalityIntegerBase<BigInteger>
 	/// <inheritdoc cref="PrimalityBase{T}.Next(in T)" />
 	public BigInteger Next(float after)
 		=> after < 0
-			? Next((BigInteger) Math.Floor(after))
+			? Next((BigInteger)Math.Floor(after))
 			: Next((BigInteger)after);
 
 	/// <inheritdoc cref="PrimalityBase{T}.Next(in T)" />
