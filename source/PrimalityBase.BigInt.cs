@@ -4,16 +4,17 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace Open.Numeric.Primes;
 
+/// <inheritdoc/>
 public abstract class PrimalityBigIntBase : PrimalityIntegerBase<BigInteger>
 {
 	/// <inheritdoc />
 	public override IEnumerator<BigInteger> GetEnumerator()
 		=> StartingAt(BigInteger.One).GetEnumerator();
 
+	/// <inheritdoc />
 	protected override IEnumerable<BigInteger> ValidPrimeTests(in BigInteger startingAt)
 		=> Candidates.StartingAt(startingAt);
 

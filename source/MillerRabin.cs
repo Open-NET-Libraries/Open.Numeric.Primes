@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
 namespace Open.Numeric.Primes;
 
+/// <summary>
+/// Miller-Rabin prime utility.
+/// </summary>
 public static class MillerRabin
 {
 	static readonly ReadOnlyMemory<ulong> AR1 = new ulong[] { 2, 7, 61 };
 	static readonly ReadOnlyMemory<ulong> AR2 = new ulong[] { 2, 3, 5, 7, 11, 13, 17 };
 	static readonly ReadOnlyMemory<ulong> AR3 = new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23 };
 
-	/* Based on: https://stackoverflow.com/questions/4236673/sample-code-for-fast-primality-testing-in-c-sharp#4236870 */
+	/// <inheritdoc cref="Polynomial.IsPrime(in ulong)"/>
 	public static bool IsPrime(in ulong value)
 	{
 		switch (value)
@@ -32,7 +36,9 @@ public static class MillerRabin
 		}
 	}
 
-	public static bool IsPrimeInternal(in ulong value)
+	/* Based on: https://stackoverflow.com/questions/4236673/sample-code-for-fast-primality-testing-in-c-sharp#4236870 */
+
+	internal static bool IsPrimeInternal(in ulong value)
 	{
 		ReadOnlySpan<ulong> ar
 			= value < 4759123141UL
@@ -124,9 +130,9 @@ public static class MillerRabin
 	/// Determines if a prime number is probably prime.
 	/// </summary>
 	public static bool IsProbablePrime(in BigInteger source, int certainty = 10)
-			=> source.Sign == -1
-				? source != BigInteger.MinusOne && IsProbablePrimeInternal(BigInteger.Abs(source), certainty)
-				: !source.IsOne && IsProbablePrimeInternal(in source, certainty);
+		=> source.Sign == -1
+			? source != BigInteger.MinusOne && IsProbablePrimeInternal(BigInteger.Abs(source), certainty)
+			: !source.IsOne && IsProbablePrimeInternal(in source, certainty);
 
 	/* Based on: https://rosettacode.org/wiki/Miller%E2%80%93Rabin_primality_test#C.23 */
 	static bool IsProbablePrimeInternal(in BigInteger source, int certainty = 10)
@@ -183,15 +189,24 @@ public static class MillerRabin
 		return true;
 	}
 
+	/// <summary>
+	/// Miller-Rabin prime discovery class for 64 bit unsigned integers (<see cref="ulong"/>).
+	/// </summary>
 	public class U64 : PrimalityU64Base
 	{
+		/// <inheritdoc />
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override bool IsPrimeInternal(in ulong value)
 			=> MillerRabin.IsPrime(in value);
 	}
 
+	/// <summary>
+	/// Miller-Rabin prime discovery class for <see cref="BigInteger"/>.
+	/// </summary>
 	public class BigInt : PrimalityBigIntBase
 	{
+		/// <inheritdoc />
 		protected override bool IsPrimeInternal(in BigInteger value)
-			=> IsProbablePrime(in value);
+			=> IsProbablePrime(in value) && Polynomial.IsPrime(in value);
 	}
 }

@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Open.Numeric.Primes.Extensions;
 using System.Numerics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,7 +6,7 @@ namespace Open.Numeric.Primes.Benchmarks;
 
 [MemoryDiagnoser]
 [SuppressMessage("Performance", "CA1822:Mark members as static")]
-public class IsPrimeBenchmarks
+public class IsPrimePolynomialBenchmarks
 {
 	const int Size = 2000000;
 	static readonly IEnumerable<int> Values = Enumerable.Range(0, Size);
@@ -20,25 +19,14 @@ public class IsPrimeBenchmarks
 	internal static readonly ReadOnlyMemory<decimal> DecimalNumbers = Values.Select(i => (decimal)i).ToArray();
 	internal static readonly ReadOnlyMemory<BigInteger> BigIntNumbers = Values.Select(i => (BigInteger)i).ToArray();
 
-	[Benchmark]
-	public void IntIsPrime()
-	{
-		var n = IntNumbers.Span;
-		var len = n.Length;
-		for (var i = 0; i < len; i++)
-		{
-			_ = n[i].IsPrime();
-		}
-	}
-
-	[Benchmark]
+	[Benchmark(Baseline = true)]
 	public void UIntIsPrime()
 	{
 		var n = UIntNumbers.Span;
 		var len = n.Length;
 		for (var i = 0; i < len; i++)
 		{
-			_ = n[i].IsPrime();
+			_ = Polynomial.IsPrime(n[i]);
 		}
 	}
 
@@ -49,44 +37,34 @@ public class IsPrimeBenchmarks
 		var len = n.Length;
 		for (var i = 0; i < len; i++)
 		{
-			_ = n[i].IsPrime();
+			_ = Polynomial.IsPrime(n[i]);
 		}
 	}
 
 	[Benchmark]
-	public void ULongIsPrime()
+	public void LongRefIsPrime()
 	{
-		var n = ULongNumbers.Span;
-		var len = n.Length;
-		for (var i = 0; i < len; i++)
-		{
-			_ = n[i].IsPrime();
-		}
-	}
-
-	[Benchmark]
-	public void ULongRefIsPrime()
-	{
-		var n = ULongNumbers.Span;
+		var n = LongNumbers.Span;
 		var len = n.Length;
 		for (var i = 0; i < len; i++)
 		{
 			ref readonly var v = ref n[i];
-			_ = Prime.Numbers.IsPrime(in v);
+			_ = Polynomial.IsPrime(in v);
 		}
 	}
 
 	[Benchmark]
-	public void DoubleIsPrime()
+	public void DecimalToBigIntIsPrime()
 	{
-		var n = DoubleNumbers.Span;
+		var n = DecimalNumbers.Span;
 		var len = n.Length;
 		for (var i = 0; i < len; i++)
 		{
-			_ = n[i].IsPrime();
+			_ = Polynomial.IsPrime((BigInteger)n[i]);
 		}
 	}
 
+#if NET7_0_OR_GREATER
 	[Benchmark]
 	public void DecimalIsPrime()
 	{
@@ -94,30 +72,20 @@ public class IsPrimeBenchmarks
 		var len = n.Length;
 		for (var i = 0; i < len; i++)
 		{
-			_ = n[i].IsPrime();
+			_ = Polynomial.IsPrime(in n[i]);
 		}
 	}
 
 	[Benchmark]
-	public void BigIntRefIsPrime()
+	public void DecimalRefIsPrime()
 	{
-		var n = BigIntNumbers.Span;
+		var n = DecimalNumbers.Span;
 		var len = n.Length;
 		for (var i = 0; i < len; i++)
 		{
 			ref readonly var v = ref n[i];
-			_ = Prime.Numbers.Big.IsPrime(in v);
+			_ = Polynomial.IsPrime(in v);
 		}
 	}
-
-	[Benchmark]
-	public void BigIntIsPrime()
-	{
-		var n = BigIntNumbers.Span;
-		var len = n.Length;
-		for (var i = 0; i < len; i++)
-		{
-			_ = n[i].IsPrime();
-		}
-	}
+#endif
 }

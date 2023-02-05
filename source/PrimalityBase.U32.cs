@@ -5,8 +5,10 @@ using System.Runtime.CompilerServices;
 
 namespace Open.Numeric.Primes;
 
+/// <inheritdoc />
 public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 {
+	/// <inheritdoc />
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	protected override IEnumerable<uint> ValidPrimeTests(in uint startingAt = 2U)
 		=> Candidates.StartingAt(startingAt);
@@ -91,6 +93,9 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 		? Factors(-value).Select(e=>-e)
 		: Factors(value);
 
+	/// <summary>
+	/// Returns true if the value can be factored. (Is not prime.)
+	/// </summary>
 	protected virtual bool IsFactorable(in int value)
 		=> !IsPrime(in value);
 

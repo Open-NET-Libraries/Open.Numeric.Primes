@@ -9,26 +9,48 @@ using System.Threading;
 
 namespace Open.Numeric.Primes;
 
+/// <summary>
+/// Trial-division prime utility.
+/// </summary>
 public static class TrialDivision
 {
-	public static readonly ImmutableArray<int> FirstKnownInt32
-		= ImmutableArray.Create(
+	/*
+	 * A note about Math.Sqrt(n):
+	 * It's used here to approximate the largest possible factor.
+	 * The maximum contiguous integer that can be represented by a double precision number is 9,007,199,254,740,991.
+	 * The good news is, if precision is lost, Math.Sqrt(n) should round up so although not perfect, it still serves its purpose.
+	 */
+
+	static readonly int[] FirstKnownInt32Array
+		= new[] {
 			2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61,
 			67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137,
 			139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211,
 			223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283,
 			293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379,
 			383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461,
-			463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541);
+			463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541 };
+
+	/// <summary>
+	/// The initial known primes to use instead of calculating them on every check.
+	/// </summary>
+	public static readonly ReadOnlyMemory<int> FirstKnownInt32 = FirstKnownInt32Array;
 
 	//static readonly int LastKnownInt32 = FirstKnownInt32.Last();
 
+	/// <summary>
+	/// Trial-division for <see cref="uint"/>.
+	/// </summary>
 	public class U32 : PrimalityU32Base
 	{
-		public static readonly ImmutableArray<uint> FirstKnown
-			= FirstKnownInt32.Select(Convert.ToUInt32).ToImmutableArray();
+		static readonly uint[] FirstKnownArray
+			= FirstKnownInt32Array.Select(Convert.ToUInt32).ToArray();
 
-		static readonly uint LastKnown = FirstKnown.Last();
+		/// <inheritdoc cref="FirstKnownInt32"/>
+		public static readonly ReadOnlyMemory<uint> FirstKnown
+			= FirstKnownInt32Array.Select(Convert.ToUInt32).ToArray();
+
+		static readonly uint LastKnown = FirstKnownArray[FirstKnownArray.Length - 1];
 
 		/// <inheritdoc />
 		public override ParallelQuery<uint> InParallel(in uint startingAt, int? degreeOfParallelism = null)
@@ -38,7 +60,7 @@ public static class TrialDivision
 			var sa = startingAt;
 			var source = sa > LastKnown
 				? ValidPrimeTests(in sa)
-				: FirstKnown
+				: FirstKnownArray
 					.SkipWhile(v => v < sa)
 					.Concat(ValidPrimeTests(LastKnown + 2));
 
@@ -52,16 +74,18 @@ public static class TrialDivision
 			return tests.Where(v => IsPrime(in v));
 		}
 
+		/// <inheritdoc />
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override bool IsPrimeInternal(in uint value)
 			=> IsPrimeInternal(value);
 
+		/// <inheritdoc />
 		protected override bool IsPrimeInternal(uint value)
 		{
 			if (value < LastKnown)
-				return FirstKnown.BinarySearch(value) != -1;
+				return FirstKnown.Span.BinarySearch(value) != -1;
 
-			var sqr = (uint)Math.Sqrt(value);
+			var sqr = Math.Sqrt(value);
 			for (var p = 5U; p <= sqr; p += 2U)
 			{
 				if (value % p == 0U)
@@ -71,6 +95,9 @@ public static class TrialDivision
 			return true;
 		}
 
+		/// <summary>
+		/// Find all primes after the provided known values.
+		/// </summary>
 		protected IEnumerable<uint> AllPrimesAfter(LinkedList<uint> known)
 		{
 			Debug.Assert(known.Count != 0);
@@ -101,15 +128,19 @@ public static class TrialDivision
 			}
 		}
 
+		/// <summary>
+		/// Iterates all possible primes.
+		/// </summary>
 		protected virtual IEnumerable<uint> AllPrimes()
 		{
-			foreach (var f in FirstKnown) // precomputed
+			foreach (var f in FirstKnownArray) // precomputed
 				yield return f;
 
-			foreach (var k in AllPrimesAfter(new LinkedList<uint>(FirstKnown)))
+			foreach (var k in AllPrimesAfter(new LinkedList<uint>(FirstKnownArray)))
 				yield return k;
 		}
 
+		/// <inheritdoc />
 		public override IEnumerator<uint> GetEnumerator()
 			=> AllPrimes().GetEnumerator();
 
@@ -125,9 +156,13 @@ public static class TrialDivision
 			return AllPrimes().SkipWhile(n => n < sa);
 		}
 
+		/// <inheritdoc />
 		protected override bool IsFactorable(in uint value)
 			=> true; // Do not do prime check first.
 
+		/// <summary>
+		/// Trial-division prime discovery class for 32 bit unsigned integers (<see cref="uint"/>) that remembers the primes used.
+		/// </summary>
 		public class Memoized : U32
 		{
 			LazyList<uint>? _memoized;
@@ -141,12 +176,13 @@ public static class TrialDivision
 					.EnsureInitialized(ref _memoized,
 						() => AllPrimesMemoizable().Memoize())!;
 
+			/// <inheritdoc />
 			protected override bool IsPrimeInternal(uint value)
 			{
 				if (value < LastKnown)
-					return FirstKnown.BinarySearch(value) != -1;
+					return FirstKnown.Span.BinarySearch(value) != -1;
 
-				var sqr = (uint)Math.Sqrt(value);
+				var sqr = Math.Sqrt(value);
 				foreach(var p in AllPrimes())
 				{
 					if (p > sqr) break;
@@ -157,10 +193,13 @@ public static class TrialDivision
 				return true;
 			}
 
+			/// <summary>
+			/// Iterates all prime numbers caching any previous prime factors.
+			/// </summary>
 			protected IEnumerable<uint> AllPrimesMemoizable()
 			{
 				uint last = 1;
-				foreach (var n in FirstKnown)
+				foreach (var n in FirstKnownArray)
 				{
 					yield return n;
 					last = n;
@@ -170,18 +209,26 @@ public static class TrialDivision
 				 * Note: here is where things start to recurse but should work perfectly
 				 * as the next primes can only be discovered by their predecessors.
 				 */
-				foreach (var n in StartingAt(last + 1).Where(v => IsPrime(in v)))
+				foreach (var n in ValidPrimeTests(last + 1).Where(v => IsPrime(in v)))
 					yield return n;
 			}
 		}
 	}
 
+	/// <summary>
+	/// Trial-division prime discovery class for 64 bit unsigned integers (<see cref="ulong"/>).
+	/// </summary>
 	public class U64 : PrimalityU64Base
 	{
-		public static readonly ImmutableArray<ulong> FirstKnown
-			= FirstKnownInt32.Select(Convert.ToUInt64).ToImmutableArray();
+		static readonly ulong[] FirstKnownArray
+			= FirstKnownInt32Array.Select(Convert.ToUInt64).ToArray();
 
-		static readonly ulong LastKnown = FirstKnown.Last();
+		/// <summary>
+		/// The initial known primes to use instead of calculating them on every check.
+		/// </summary>
+		public static readonly ReadOnlyMemory<ulong> FirstKnown = FirstKnownArray;
+
+		static readonly ulong LastKnown = FirstKnownArray[FirstKnownArray.Length - 1];
 
 		/// <inheritdoc />
 		public override ParallelQuery<ulong> InParallel(in ulong startingAt, int? degreeOfParallelism = null)
@@ -191,7 +238,7 @@ public static class TrialDivision
 			var sa = startingAt;
 			var source = sa > LastKnown
 				? ValidPrimeTests(in sa)
-				: FirstKnown
+				: FirstKnownArray
 					.SkipWhile(v => v < sa)
 					.Concat(ValidPrimeTests(LastKnown + 2));
 
@@ -207,12 +254,13 @@ public static class TrialDivision
 
 		// const ulong MAX_ULONG_SQUARE_ROOT = 4294967296;
 
+		/// <inheritdoc />
 		protected override bool IsPrimeInternal(in ulong value)
 		{
 			if (value < LastKnown)
-				return FirstKnown.BinarySearch(value) != -1;
+				return FirstKnown.Span.BinarySearch(value) != -1;
 
-			var sqr = (ulong)Math.Sqrt(value);
+			var sqr = Math.Sqrt(value);
 			for (var p = 5UL; p <= sqr; p += 2UL)
 			{
 				if (value % p == 0) return false;
@@ -221,7 +269,7 @@ public static class TrialDivision
 			return true;
 		}
 
-		protected IEnumerable<ulong> AllPrimesAfter(LinkedList<ulong> known)
+		private IEnumerable<ulong> AllPrimesAfter(LinkedList<ulong> known)
 		{
 			Debug.Assert(known.Count != 0);
 			var last = known.Last!.Value;
@@ -251,15 +299,19 @@ public static class TrialDivision
 			}
 		}
 
+		/// <summary>
+		/// Iterates all possible primes.
+		/// </summary>
 		protected virtual IEnumerable<ulong> AllPrimes()
 		{
-			foreach (var f in FirstKnown)
+			foreach (var f in FirstKnownArray)
 				yield return f;
 
-			foreach (var k in AllPrimesAfter(new LinkedList<ulong>(FirstKnown)))
+			foreach (var k in AllPrimesAfter(new LinkedList<ulong>(FirstKnownArray)))
 				yield return k;
 		}
 
+		/// <inheritdoc />
 		public override IEnumerator<ulong> GetEnumerator()
 			=> AllPrimes().GetEnumerator();
 
@@ -274,9 +326,13 @@ public static class TrialDivision
 			return AllPrimes().SkipWhile(n => n < sa);
 		}
 
+		/// <inheritdoc />
 		protected override bool IsFactorable(in ulong value)
 			=> true; // Do not do prime check first.
 
+		/// <summary>
+		/// Trial-division prime discovery class for 64 bit unsigned integers (<see cref="ulong"/>) that remembers the primes used.
+		/// </summary>
 		public class Memoized : U64
 		{
 			LazyList<ulong>? _memoized;
@@ -289,12 +345,13 @@ public static class TrialDivision
 					.EnsureInitialized(ref _memoized,
 						() => AllPrimesMemoizable().Memoize())!;
 
+			/// <inheritdoc />
 			protected override bool IsPrimeInternal(in ulong value)
 			{
 				if (value < LastKnown)
-					return FirstKnown.BinarySearch(value) != -1;
+					return FirstKnown.Span.BinarySearch(value) != -1;
 
-				var sqr = (uint)Math.Sqrt(value);
+				var sqr = Math.Sqrt(value);
 				foreach (var p in AllPrimes())
 				{
 					if (p > sqr) break;
@@ -305,10 +362,10 @@ public static class TrialDivision
 				return true;
 			}
 
-			protected IEnumerable<ulong> AllPrimesMemoizable()
+			private IEnumerable<ulong> AllPrimesMemoizable()
 			{
 				ulong last = 1;
-				foreach (var n in FirstKnown)
+				foreach (var n in FirstKnownArray)
 				{
 					yield return n;
 					last = n;

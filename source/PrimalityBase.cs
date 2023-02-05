@@ -6,6 +6,9 @@ using System.Runtime.CompilerServices;
 
 namespace Open.Numeric.Primes;
 
+/// <summary>
+/// Base class for defining prime tests, prime discovery, and number factorization.
+/// </summary>
 public abstract partial class PrimalityBase<T> : IEnumerable<T>
 {
 	// Find IsPrime and more defined in other partials.
@@ -17,8 +20,14 @@ public abstract partial class PrimalityBase<T> : IEnumerable<T>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public bool IsPrime(T value) => IsPrime(in value);
 
+	/// <summary>
+	/// Core method for determining if a number is prime or not.
+	/// </summary>
 	protected abstract bool IsPrimeInternal(in T value);
 
+	/// <summary>
+	/// Iterates all possible prime candidates.
+	/// </summary>
 #if NET7_0_OR_GREATER
 	protected virtual IEnumerable<T> ValidPrimeTests(in T startingAt)
 		=> Candidates.StartingAt(in startingAt);
@@ -75,6 +84,9 @@ public abstract partial class PrimalityBase<T> : IEnumerable<T>
 	public ParallelQuery<T> InParallel(int? degreeOfParallelism = null)
 		=> InParallel(default!, degreeOfParallelism);
 
+	/// <summary>
+	/// Returns true if the value can be factored. (Is not prime.)
+	/// </summary>
 	protected virtual bool IsFactorable(in T value)
 		=> !IsPrime(in value);
 

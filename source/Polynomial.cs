@@ -4,6 +4,9 @@ using System.Diagnostics;
 
 namespace Open.Numeric.Primes;
 
+/// <summary>
+/// Polynomial prime utility.
+/// </summary>
 public static class Polynomial
 {
 	/// <summary>
@@ -200,24 +203,38 @@ public static class Polynomial
 		=> IsTPrime(in value, Number<T>.Six);
 #endif
 
+	/// <summary>
+	/// Polynomial utility for <see cref="uint"/>.
+	/// </summary>
 	public class U32 : PrimalityU32Base
 	{
+		/// <inheritdoc />
 		// ReSharper disable once MemberHidesStaticFromOuterClass
 		protected override bool IsPrimeInternal(uint value)
 			=> IsUIntPrime(value);
+
+		/// <inheritdoc />
 		protected override bool IsPrimeInternal(in uint value)
 			=> IsUIntPrime(value);
 	}
 
+	/// <summary>
+	/// Polynomial utility for <see cref="ulong"/>.
+	/// </summary>
 	public class U64 : PrimalityU64Base
 	{
+		/// <inheritdoc />
 		// ReSharper disable once MemberHidesStaticFromOuterClass
 		protected override bool IsPrimeInternal(in ulong value)
 			=> IsULongPrime(in value);
 	}
 
+	/// <summary>
+	/// Polynomial utility for <see cref="BigInteger"/>.
+	/// </summary>
 	public class BigInt : PrimalityBigIntBase
 	{
+		/// <inheritdoc />
 		protected override bool IsPrimeInternal(in BigInteger value)
 			=> IsBigIntPrime(in value, 6UL);
 	}

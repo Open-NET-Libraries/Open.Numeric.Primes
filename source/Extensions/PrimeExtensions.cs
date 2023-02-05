@@ -5,6 +5,9 @@ using System.Runtime.CompilerServices;
 
 namespace Open.Numeric.Primes.Extensions;
 
+/// <summary>
+/// An easily accessible set of extensions for detecting prime numbers as well as factors.
+/// </summary>
 public static class PrimeExtensions
 {
 	/// <inheritdoc cref="Number.IsPrime(in ulong)"/>
@@ -19,8 +22,8 @@ public static class PrimeExtensions
 
 	/// <inheritdoc cref="IsPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool IsPrime(in this int value)
-		=> Number.IsPrime(value);
+	public static bool IsPrime(this int value)
+		=> Number.IsPrime(value < 0 ? (uint)-value : (uint)value);
 
 	/// <inheritdoc cref="IsPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -35,7 +38,7 @@ public static class PrimeExtensions
 	/// <inheritdoc cref="IsPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsPrime(this ushort value)
-		=> Number.IsPrime(value);
+		=> Number.IsPrime((uint)value);
 
 	/// <inheritdoc cref="IsPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -45,75 +48,56 @@ public static class PrimeExtensions
 	/// <inheritdoc cref="IsPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsPrime(this byte value)
+		=> Number.IsPrime((uint)value);
+
+	/// <inheritdoc cref="IsPrime(in ulong)"/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool IsPrime(in this double value)
 		=> Number.IsPrime(value);
 
 	/// <inheritdoc cref="IsPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool IsPrime(this double value)
-		=> Number.IsPrime(value);
-
-	/// <inheritdoc cref="IsPrime(in ulong)"/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool IsPrime(this decimal value)
+	public static bool IsPrime(in this decimal value)
 		=> Number.IsPrime(in value);
 
 	/// <inheritdoc cref="IsPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool IsPrime(this BigInteger value)
+	public static bool IsPrime(in this BigInteger value)
 		=> Number.IsPrime(in value);
 
-	/// <summary>
-	/// Finds the next prime number after the number given.
-	/// </summary>
-	/// <returns>The next prime after the number provided.</returns>
-	/// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
+	/// <inheritdoc cref="PrimalityBase{T}.Next(in T)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static ulong NextPrime(this ulong value)
+	public static ulong NextPrime(in this ulong value)
 		=> Prime.Numbers.Next(in value);
 
-	/// <summary>
-	/// Finds the next prime number after the number given.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.
-	/// </summary>
-	/// <returns>The next prime after the number provided.</returns>
+	/// <inheritdoc cref="NextPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static long NextPrime(this long value)
+	public static long NextPrime(in this long value)
 		=> Prime.Numbers.Next(in value);
 
-	/// <summary>
-	/// Finds the next prime number after the number given.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.
-	/// </summary>
-	/// <returns>The next prime after the number provided.</returns>
+	/// <inheritdoc cref="NextPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static BigInteger NextPrime(this float value)
 		=> Prime.Numbers.Big.Next(value);
 
-	/// <summary>
-	/// Finds the next prime number after the number given.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.
-	/// </summary>
-	/// <returns>The next prime after the number provided.</returns>
-	/// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
+	/// <inheritdoc cref="NextPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static BigInteger NextPrime(this double value)
+	public static BigInteger NextPrime(in this double value)
 		=> Prime.Numbers.Big.Next(value);
 
-	/// <summary>
-	/// Finds the next prime number after the number given.  If this number is negative, then the result will be the next greater magnitude value prime as negative number.
-	/// </summary>
-	/// <returns>The next prime after the number provided.</returns>
-	/// <exception cref="ArgumentException">Cannot coerce to a valid long value.</exception>
+	/// <inheritdoc cref="NextPrime(in ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static BigInteger NextPrime(this BigInteger value)
 		=> Prime.Numbers.Big.Next(in value);
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// If omitOneAndValue==false, first multiple is always 0 or 1.
-	/// Else if the value is prime, then there will be no results.
-	/// </summary>
-	/// <param name="value">The value to factor.</param>
-	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+	/// <inheritdoc cref="Prime.Factors(ulong, bool)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static IEnumerable<ulong> PrimeFactors(this ulong value, bool omitOneAndValue = false)
+	public static IEnumerable<ulong> PrimeFactors(in this ulong value, bool omitOneAndValue = false)
+		=> Prime.Factors(value, omitOneAndValue);
+
+	/// <inheritdoc cref="PrimeFactors(in ulong, bool)"/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static IEnumerable<long> PrimeFactors(in this long value, bool omitOneAndValue = false)
 		=> Prime.Factors(value, omitOneAndValue);
 
 	/// <summary>
@@ -124,18 +108,7 @@ public static class PrimeExtensions
 	/// <param name="value">The value to factor.</param>
 	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static IEnumerable<long> PrimeFactors(this long value, bool omitOneAndValue = false)
-		=> Prime.Factors(value, omitOneAndValue);
-
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
-	/// Else if the value is prime, then there will be no results.
-	/// </summary>
-	/// <param name="value">The value to factor.</param>
-	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static IEnumerable<BigInteger> PrimeFactors(this BigInteger value, bool omitOneAndValue = false)
+	public static IEnumerable<BigInteger> PrimeFactors(in this BigInteger value, bool omitOneAndValue = false)
 		=> Prime.Factors(value, omitOneAndValue);
 
 	/// <summary>
@@ -145,7 +118,7 @@ public static class PrimeExtensions
 	/// </summary>
 	/// <param name="value">The value to factor.</param>
 	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
-	public static IEnumerable<dynamic> PrimeFactors(this double value, bool omitOneAndValue = false)
+	public static IEnumerable<double> PrimeFactors(in this double value, bool omitOneAndValue = false)
 		=> Prime.Factors(value, omitOneAndValue);
 
 	/// <summary>
@@ -155,7 +128,7 @@ public static class PrimeExtensions
 	/// </summary>
 	/// <param name="value">The value to factor.</param>
 	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
-	public static IEnumerable<dynamic> PrimeFactors(this float value, bool omitOneAndValue = false)
+	public static IEnumerable<float> PrimeFactors(this float value, bool omitOneAndValue = false)
 		=> Prime.Factors(value, omitOneAndValue);
 
 	/// <summary>

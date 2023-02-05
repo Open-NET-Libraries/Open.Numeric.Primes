@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using Xunit;
@@ -18,7 +16,7 @@ public static class PrimeNumbers
 	static readonly ImmutableArray<int> FirstNotInt32
 		= Enumerable
 			.Range(0, FirstKnownInt32.Last())
-			.Where(i=> FirstKnownInt32.BinarySearch(i) == -1)
+			.Where(i => FirstKnownInt32.BinarySearch(i) == -1)
 			.ToImmutableArray();
 
 	[Theory]
@@ -71,10 +69,13 @@ public static class PrimeNumbers
 
 	[Fact]
 	public static void ValidateFirstKnown()
-	{
-		FirstKnownInt32.Take(TrialDivision.FirstKnownInt32.Length)
-			.Should().BeEquivalentTo(TrialDivision.FirstKnownInt32);
-	}
+		=> FirstKnownInt32.Take(TrialDivision.FirstKnownInt32.Length)
+			.Should().BeEquivalentTo(TrialDivision.FirstKnownInt32.ToArray());
+
+	static readonly TrialDivision.U32.Memoized U32M = new();
+	static readonly TrialDivision.U64.Memoized U64M = new();
+
+	const int MaxConfirm = 100000;
 
 	static void PrimesTest32<T>()
 		where T : PrimalityBase<uint>, new()
@@ -84,6 +85,8 @@ public static class PrimeNumbers
 		var i = new T();
 		firstPrime.Should().BeEquivalentTo(i.Take(KnownLen));
 		firstPrime.Should().BeEquivalentTo(i.InParallel().Take(KnownLen));
+		if (i is not TrialDivision.U32.Memoized)
+			U32M.Take(MaxConfirm).Should().BeEquivalentTo(i.Take(MaxConfirm));
 
 		foreach (var p in firstPrime)
 			i.IsPrime(p).Should().BeTrue();
@@ -100,13 +103,14 @@ public static class PrimeNumbers
 		var i = new T();
 		firstPrime.Should().BeEquivalentTo(i.Take(KnownLen));
 		firstPrime.Should().BeEquivalentTo(i.InParallel().Take(KnownLen));
+		if(i is not TrialDivision.U64.Memoized)
+			U64M.Take(MaxConfirm).Should().BeEquivalentTo(i.Take(MaxConfirm));
 
 		foreach (var p in firstPrime)
 			i.IsPrime(p).Should().BeTrue();
 
 		foreach (var p in FirstNotInt32.Select(i => (ulong)i).ToArray())
 			i.IsPrime(p).Should().BeFalse();
-
 	}
 
 	static void PrimesTestBig<T>()
@@ -125,7 +129,16 @@ public static class PrimeNumbers
 	}
 
 	[Fact]
+	public static void Primes_UIntByDivision() => PrimesTest32<TrialDivision.U32>();
+
+	[Fact]
 	public static void Primes_ULongByDivision() => PrimesTest64<TrialDivision.U64>();
+
+	[Fact]
+	public static void Primes_UIntByDivisionMemoized() => PrimesTest32<TrialDivision.U32.Memoized>();
+
+	[Fact]
+	public static void Primes_ULongByDivisionMemoized() => PrimesTest64<TrialDivision.U64.Memoized>();
 
 	[Fact]
 	public static void Primes_UIntFromPolynomial() => PrimesTest32<Polynomial.U32>();

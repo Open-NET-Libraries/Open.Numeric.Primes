@@ -5,28 +5,15 @@ using System.Runtime.CompilerServices;
 namespace Open.Numeric.Primes;
 
 #if NET7_0_OR_GREATER
-public static class Number<T>
+/// <summary>
+/// A small set of commonly reused numbers of type <typeparamref name="T"/>.
+/// </summary>
+internal static class Number<T>
 	where T : notnull, INumber<T>
 {
 	internal static readonly T Two = T.One + T.One;
 	internal static readonly T Three = T.One + Two;
 	internal static readonly T Six = Three + Three;
-
-	//[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
-	//public sealed override bool IsPrime(in T value)
-	//{
-	//	if (T.IsZero(value) || value == T.One)
-	//		return false;
-
-	//	if (value == Two || value == Three)
-	//		return true;
-
-	//	if (T.IsZero(value % Two) || T.IsZero(value % Three))
-	//		return false;
-
-	//	return IsPrimeInternal(in value);
-	//}
-
 }
 #endif
 
@@ -45,16 +32,21 @@ public static class Number
 	public static bool IsPrime(in ulong value)
 		=> Prime.Numbers.IsPrime(in value);
 
-	/// <inheritdoc cref="IsPrime(ulong)"/>
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool IsPrime(uint value)
-		=> Prime.Numbers.IsPrime(value);
-
 	// Overload for use with simplified delegate use.
 	/// <inheritdoc cref="IsPrime(ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsPrime(ulong value)
-		=> Prime.Numbers.IsPrime(in value);
+		=> IsPrime(in value);
+
+	/// <inheritdoc cref="IsPrime(ulong)"/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool IsPrime(int value)
+		=> Polynomial.IsPrime((uint)Math.Abs(value));
+
+	/// <inheritdoc cref="IsPrime(ulong)"/>
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool IsPrime(uint value)
+		=> Polynomial.IsPrime(value);
 
 	/// <inheritdoc cref="IsPrime(ulong)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Open.Numeric.Primes;
 
+/// <inheritdoc />
 public abstract class PrimalityU64Base : PrimalityIntegerBase<ulong>
 {
+	/// <inheritdoc />
 	protected override IEnumerable<ulong> ValidPrimeTests(in ulong startingAt = 2U)
 		=> Candidates.StartingAt(startingAt);
 
@@ -29,8 +30,8 @@ public abstract class PrimalityU64Base : PrimalityIntegerBase<ulong>
 			? selection.Select(ConvertInt64Negative)
 			: selection.Select(Convert.ToInt64);
 #else
-			? selection.Select(e=>ConvertInt64Negative(e))
-			: selection.Select(e=>Convert.ToInt64(e));
+			? selection.Select(e => ConvertInt64Negative(e))
+			: selection.Select(e => Convert.ToInt64(e));
 #endif
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,31 +53,32 @@ public abstract class PrimalityU64Base : PrimalityIntegerBase<ulong>
 	/// <inheritdoc />
 	public override IEnumerable<ulong> Factors(ulong value)
 	{
-		if (value != 0UL)
+		if (value == 0UL)
+			goto exit;
+
+		yield return 1UL;
+		if (value == 1UL) yield break;
+		ulong last = 1UL;
+
+		// For larger numbers, a quick prime check can prevent large iterations.
+		if (!IsFactorable(value))
+			goto exit;
+
+		foreach (var p in this)
 		{
-			yield return 1;
-			if (value == 1) yield break;
-			ulong last = 1;
-
-			// For larger numbers, a quick prime check can prevent large iterations.
-			if (IsFactorable(value))
+			var stop = value / last; // The list of possibilities shrinks for each test.
+			if (p > stop) break; // Exceeded possibilities? 
+			while ((value % p) == 0UL)
 			{
-				foreach (var p in this)
-				{
-					var stop = value / last; // The list of possibilities shrinks for each test.
-					if (p > stop) break; // Exceeded possibilities? 
-					while ((value % p) == 0)
-					{
-						value /= p;
-						yield return p;
-						if (value == 1) yield break;
-					}
-
-					last = p;
-				}
+				value /= p;
+				yield return p;
+				if (value == 1UL) yield break;
 			}
+
+			last = p;
 		}
 
+	exit:
 		yield return value;
 	}
 
@@ -119,6 +121,7 @@ public abstract class PrimalityU64Base : PrimalityIntegerBase<ulong>
 		yield return value;
 	}
 
+	/// <inheritdoc />
 	protected virtual bool IsFactorable(in long value)
 		=> !IsPrime(in value);
 

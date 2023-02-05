@@ -10,6 +10,11 @@ public abstract partial class PrimalityBase<T>
 	/// <inheritdoc cref="IsPrime(T)"/>
 	public abstract bool IsPrime(in T value);
 
+	/// <summary>
+	/// Iterates the prime factors of the provided value.
+	/// First multiple is always 0, 1 or -1.
+	/// </summary>
+	/// <param name="value">The value to factorize.</param>
 	public abstract IEnumerable<T> Factors(T value);
 
 	/// <summary>

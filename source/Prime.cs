@@ -1,35 +1,29 @@
 ﻿using Open.Collections;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Open.Numeric.Primes;
 
 /// <summary>
-/// A useful set of prime discovery and prime factorization functions.
+/// A useful set of prime discovery and prime factorization functions.<br/>
 /// Unique overloads for certain number types including BigInteger in order to ensure efficiency and compiler optimizations.
-/// Negative numbers are allowed and the signs are preserved.
 /// </summary>
+/// <remarks>Negative numbers are allowed where possible and the signs are preserved.</remarks>
 public static class Prime
 {
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
-	static double ToDouble(in float value)
-	{
-		// Need to properly convert a float to double to avoid potential precision error.
-		if (float.IsNaN(value))
-			return double.NaN;
+	internal static readonly Polynomial.U32 Numbers32 = new();
 
-		if (float.IsPositiveInfinity(value))
-			return double.PositiveInfinity;
-
-		return float.IsNegativeInfinity(value)
-			? double.NegativeInfinity
-			: double.Parse(value.ToString(CultureInfo.InvariantCulture));
-	}
-
+	/// <summary>
+	/// The default <see cref="Optimized"/> instance.
+	/// </summary>
 	public static readonly Optimized Numbers = new();
+
+	/// <inheritdoc cref="PrimalityBase{T}.Factors(T)"/>
+	public static IEnumerable<uint> Factors(uint value)
+		=> Numbers32.Factors(value);
 
 	/// <inheritdoc cref="PrimalityBase{T}.Factors(T)"/>
 	public static IEnumerable<ulong> Factors(ulong value)
@@ -43,6 +37,8 @@ public static class Prime
 	public static IEnumerable<BigInteger> Factors(BigInteger value)
 		=> Numbers.Big.Factors(value);
 
+	const float FloatLargestContiguousInt = 16777216;
+
 	/// <summary>
 	/// Iterates the prime factors of the provided value.
 	/// First multiple is always 0, 1 or -1.
@@ -52,40 +48,89 @@ public static class Prime
 	/// An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.
 	/// Value types may differ depending on the magnitude of the provided value.
 	/// </returns>
-	public static IEnumerable<dynamic> Factors(double value)
+	[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
+	public static IEnumerable<float> Factors(float value)
 	{
 		// ReSharper disable once CompareOfFloatsByEqualityOperator
-		if (double.IsNaN(value) || value == 0)
+		if (float.IsNaN(value) || value == 0 || value % 1f != 0 || float.IsInfinity(value))
 		{
 			yield return value;
+			yield break;
+		}
+
+		var sign = 1f;
+		if (value < 0)
+		{
+			sign = -1f;
+			value = Math.Abs(value);
+		}
+
+		if (value > FloatLargestContiguousInt)
+		{
+			throw new ArgumentOutOfRangeException(nameof(value), value,
+				"Cannot accurately factor a single precision number larger than 16777216.");
+		}
+
+		yield return sign;
+
+		// ReSharper disable once CompareOfFloatsByEqualityOperator
+		if (value == 1d)
+			yield break;
+
+		foreach (var n in Factors((uint)value).Skip(1))
+			yield return n;
+	}
+
+	const double DoubleLargestContiguousInt = 9007199254740992;
+
+	/// <summary>
+	/// Iterates the prime factors of the provided value.
+	/// First multiple is always 0, 1 or -1.
+	/// </summary>
+	/// <param name="value">The value to factorize.</param>
+	/// <returns>
+	/// An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.
+	/// Value types may differ depending on the magnitude of the provided value.
+	/// </returns>
+	[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
+	public static IEnumerable<double> Factors(double value)
+	{
+		// ReSharper disable once CompareOfFloatsByEqualityOperator
+		if (double.IsNaN(value) || value == 0 || value % 1d != 0 || double.IsInfinity(value))
+		{
+			yield return value;
+			yield break;
+		}
+
+		var sign = 1d;
+		if (value < 0)
+		{
+			sign = -1d;
+			value = Math.Abs(value);
+		}
+
+		if (value > DoubleLargestContiguousInt)
+		{
+			throw new ArgumentOutOfRangeException(nameof(value), value,
+				"Cannot accurately factor a double precision number larger than 9007199254740992.");
+		}
+
+		yield return sign;
+
+		// ReSharper disable once CompareOfFloatsByEqualityOperator
+		if (value == 1d)
+			yield break;
+
+		if (value <= uint.MaxValue)
+		{
+			// Use more efficient uint instead.
+			foreach (var n in Factors((uint)value).Skip(1))
+				yield return n;
 		}
 		else
 		{
-			yield return value < 1 ? -1 : 1;
-			if (value < 0) value = Math.Abs(value);
-			// ReSharper disable once CompareOfFloatsByEqualityOperator
-			if (value == 1d)
-				yield break;
-
-			// ReSharper disable once CompareOfFloatsByEqualityOperator
-			if (value != Math.Floor(value) || double.IsInfinity(value))
-			{
-				yield return value;
-			}
-			else
-			{
-				if (value <= ulong.MaxValue)
-				{
-					// Use more efficient ulong instead.
-					foreach (var n in Factors((ulong)value).Skip(1))
-						yield return n;
-				}
-				else
-				{
-					foreach (var b in Factors((BigInteger)value).Skip(1))
-						yield return b;
-				}
-			}
+			foreach (var n in Factors((ulong)value).Skip(1))
+				yield return n;
 		}
 	}
 
@@ -98,8 +143,40 @@ public static class Prime
 	/// An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.
 	/// Value types may differ depending on the magnitude of the provided value.
 	/// </returns>
-	public static IEnumerable<dynamic> Factors(float value)
-		=> Factors(ToDouble(value));
+	public static IEnumerable<decimal> Factors(decimal value)
+	{
+		// ReSharper disable once CompareOfFloatsByEqualityOperator
+		if (value == decimal.Zero
+			|| value % decimal.One != decimal.Zero)
+		{
+			yield return value;
+			yield break;
+		}
+
+		yield return value < decimal.Zero ? -decimal.One : decimal.One;
+		value = Math.Abs(value);
+
+		if (value == decimal.One)
+			yield break;
+
+		if (value <= uint.MaxValue)
+		{
+			// Use more efficient uint instead.
+			foreach (var n in Factors((uint)value).Skip(1))
+				yield return n;
+		}
+		else if (value <= ulong.MaxValue)
+		{
+			// Use more efficient ulong instead.
+			foreach (var n in Factors((ulong)value).Skip(1))
+				yield return n;
+		}
+		else
+		{
+			foreach (var b in Factors((BigInteger)value).Skip(1))
+				yield return (decimal)b;
+		}
+	}
 
 	/// <summary>
 	/// Iterates the prime factors of the provided value.
@@ -108,7 +185,7 @@ public static class Prime
 	/// </summary>
 	/// <param name="value">The value to factorize.</param>
 	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
-	public static IEnumerable<dynamic> Factors(double value, bool omitOneAndValue)
+	public static IEnumerable<double> Factors(double value, bool omitOneAndValue)
 		=> omitOneAndValue
 			? Factors(value).Skip(1).TakeWhile(v => v != value)
 			: Factors(value);
@@ -120,7 +197,7 @@ public static class Prime
 	/// </summary>
 	/// <param name="value">The value to factorize.</param>
 	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned..</param>
-	public static IEnumerable<dynamic> Factors(float value, bool omitOneAndValue)
+	public static IEnumerable<float> Factors(float value, bool omitOneAndValue)
 		=> omitOneAndValue
 			? Factors(value).Skip(1).TakeWhile(v => v != value)
 			: Factors(value);
@@ -276,7 +353,8 @@ public static class Prime
 			.Distinct()
 			.Select(v => Factors(v).GetEnumerator())
 			.Memoize();
-		var maxFactor = -1;
+
+		var maxFactor = -BigInteger.One;
 		try
 		{
 			while (true)
