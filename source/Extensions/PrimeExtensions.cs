@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -7,6 +8,7 @@ namespace Open.Numeric.Primes.Extensions;
 /// <summary>
 /// An easily accessible set of extensions for detecting prime numbers as well as factors.
 /// </summary>
+[ExcludeFromCodeCoverage] // Because it's just passing through to the actual methods.
 public static class PrimeExtensions
 {
 	/// <inheritdoc cref="Number.IsPrime(in ulong)"/>
@@ -110,23 +112,11 @@ public static class PrimeExtensions
 	public static IEnumerable<BigInteger> PrimeFactors(in this BigInteger value, bool omitOneAndValue = false)
 		=> Prime.Factors(value, omitOneAndValue);
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
-	/// Else if the value is prime or not a whole number, then there will be no results.
-	/// </summary>
-	/// <param name="value">The value to factor.</param>
-	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+	/// <inheritdoc cref="PrimeFactors(in BigInteger, bool)"/>
 	public static IEnumerable<double> PrimeFactors(in this double value, bool omitOneAndValue = false)
 		=> Prime.Factors(value, omitOneAndValue);
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
-	/// Else if the value is prime or not a whole number, then there will be no results.
-	/// </summary>
-	/// <param name="value">The value to factor.</param>
-	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+	/// <inheritdoc cref="PrimeFactors(in BigInteger, bool)"/>
 	public static IEnumerable<float> PrimeFactors(this float value, bool omitOneAndValue = false)
 		=> Prime.Factors(value, omitOneAndValue);
 
@@ -138,19 +128,11 @@ public static class PrimeExtensions
 	public static IEnumerable<long> CommonPrimeFactors(this IEnumerable<long> values)
 		=> Prime.CommonFactors(values);
 
-	/// <summary>
-	/// Iterates all the possible common prime factors of the provided numbers.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>An enumerable of the common prime factors.</returns>
+	/// <inheritdoc cref="CommonPrimeFactors(IEnumerable{long})"/>
 	public static IEnumerable<ulong> CommonPrimeFactors(this IEnumerable<ulong> values)
 		=> Prime.CommonFactors(values);
 
-	/// <summary>
-	/// Iterates all the possible common prime factors of the provided numbers.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>An enumerable of the common prime factors.</returns>
+	/// <inheritdoc cref="CommonPrimeFactors(IEnumerable{long})"/>
 	public static IEnumerable<BigInteger> CommonPrimeFactors(this IEnumerable<BigInteger> values)
 		=> Prime.CommonFactors(values);
 
@@ -163,21 +145,11 @@ public static class PrimeExtensions
 	public static long GreatestPrimeFactor(this IEnumerable<long> values)
 		=> Prime.GreatestFactor(values);
 
-	/// <summary>
-	/// Returns the greatest common (positive) factor (GCF) of all the provided values.
-	/// Returns 1 if none found.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>The greatest common factor or 1 if none found.</returns>
+	/// <inheritdoc cref="GreatestPrimeFactor(IEnumerable{long})"/>
 	public static ulong GreatestPrimeFactor(this IEnumerable<ulong> values)
 		=> Prime.GreatestFactor(values);
 
-	/// <summary>
-	/// Returns the greatest common (positive) factor (GCF) of all the provided values.
-	/// Returns 1 if none found.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>The greatest common factor or 1 if none found.</returns>
+	/// <inheritdoc cref="GreatestPrimeFactor(IEnumerable{long})"/>
 	public static BigInteger GreatestPrimeFactor(this IEnumerable<BigInteger> values)
 		=> Prime.GreatestFactor(values);
 }

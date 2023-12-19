@@ -19,7 +19,7 @@ public abstract class PrimalityBigIntBase : PrimalityIntegerBase<BigInteger>
 		=> Candidates.StartingAt(startingAt);
 
 	/// <inheritdoc />
-	public override IEnumerable<KeyValuePair<BigInteger, BigInteger>> Indexed()
+	public new IEnumerable<KeyValuePair<BigInteger, BigInteger>> Indexed()
 	{
 		var count = BigInteger.Zero;
 		foreach (var n in this)

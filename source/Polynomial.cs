@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
@@ -34,6 +35,14 @@ public static class Polynomial
 				return IsUIntPrime(value);
 		}
 	}
+
+	/// <inheritdoc cref="IsPrime(uint)"/>
+	public static bool IsPrime(int value)
+		=> IsPrime((uint)Math.Abs(value));
+
+	/// <inheritdoc cref="IsPrime(uint)"/>
+	public static bool IsPrime(in long value)
+		=> IsPrime((ulong)Math.Abs(value));
 
 	/// <inheritdoc cref="IsPrime(uint)"/>
 	public static bool IsPrime(in ulong value)
@@ -83,34 +92,6 @@ public static class Polynomial
 				&& IsBigIntPrime(in v, 6);
 		}
 	}
-
-#if NET7_0_OR_GREATER
-	/// <inheritdoc cref="IsPrime(uint)"/>
-	[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
-	public static bool IsPrime<T>(in T value)
-		where T : INumber<T>
-	{
-		return T.IsInteger(value)
-			&& (T.Sign(value) == -1
-				? IsPrimeCore(T.Abs(value))
-				: IsPrimeCore(in value));
-
-		static bool IsPrimeCore(in T value)
-		{
-			Debug.Assert(T.IsPositive(value));
-
-			if (value < Number<T>.Two)
-				return false;
-
-			if (value - Number<T>.Two <= T.One)
-				return true;
-
-			return !T.IsEvenInteger(value)
-				&& !T.IsZero(value % Number<T>.Three)
-				&& IsTPrime(in value);
-		}
-	}
-#endif
 
 	internal static bool IsUIntPrime(uint value)
 	{
@@ -178,6 +159,32 @@ public static class Polynomial
 	}
 
 #if NET7_0_OR_GREATER
+	/// <inheritdoc cref="IsPrime(uint)"/>
+	[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
+	public static bool IsPrime<T>(in T value)
+		where T : INumber<T>
+	{
+		return T.IsInteger(value)
+			&& (T.Sign(value) == -1
+				? IsPrimeCore(T.Abs(value))
+				: IsPrimeCore(in value));
+
+		static bool IsPrimeCore(in T value)
+		{
+			Debug.Assert(T.IsPositive(value));
+
+			if (value < Number<T>.Two)
+				return false;
+
+			if (value - Number<T>.Two <= T.One)
+				return true;
+
+			return !T.IsEvenInteger(value)
+				&& !T.IsZero(value % Number<T>.Three)
+				&& IsTPrime(in value);
+		}
+	}
+
 	internal static bool IsTPrime<T>(in T value, T divisor)
 		where T : notnull, INumber<T>
 	{

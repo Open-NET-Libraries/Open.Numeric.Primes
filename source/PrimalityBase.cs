@@ -54,7 +54,16 @@ public abstract partial class PrimalityBase<T> : IEnumerable<T>
 	/// Returns key-value pairs of every prime starting where the key is the index (starting at 1) of the set.
 	/// </summary>
 	/// <remarks>The first entry is always {Key=1, Value=2}.</remarks>
-	public abstract IEnumerable<KeyValuePair<T, T>> Indexed();
+	/// <inheritdoc />
+	public IEnumerable<KeyValuePair<ulong, T>> Indexed()
+	{
+		ulong count = 0L;
+		foreach (var n in this)
+		{
+			count++;
+			yield return new KeyValuePair<ulong, T>(count, n);
+		}
+	}
 
 	/// <summary>
 	/// Returns a parallel enumerable that will iterate every prime starting at the starting value.

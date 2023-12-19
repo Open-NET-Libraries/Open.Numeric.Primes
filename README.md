@@ -7,7 +7,6 @@ Methods and extensions for prime number detection and discovery.
 ## Examples
 
 ### Importing
-
 ```cs
 using Open.Numeric.Primes;
 ```
@@ -15,25 +14,25 @@ using Open.Numeric.Primes;
 ### Primality Test
 
 ```cs
-Number.IsPrime(8592868089022906369) // true
+Number.IsPrime(8592868089022906369); // true
 ```
 
 ### Factors
 
 ```cs
-Prime.Factors(12) // 2, 2, 3
+Prime.Factors(12); // 2, 2, 3
 ```
 
 ### Common Factors
 
 ```cs
-Prime.CommonFactors(84, 756, 108) // 2, 2, 3
+Prime.CommonFactors(84, 756, 108); // 2, 2, 3
 ```
 
 ### Greatest Factor
 
 ```cs
-Prime.GreatestFactor(84, 756, 108) // 12
+Prime.GreatestFactor(84, 756, 108); // 12
 ```
 
 ### Prime Discovery
@@ -54,4 +53,14 @@ foreach(var prime in Prime.Numbers.StartingAt(10000).Take(100))
 {
     Console.Write(prime);
 }
+```
+
+### Extensions
+
+Extensions are also available for integer types.
+
+```cs
+using Open.Numeric.Primes.Extensions;
+
+8592868089022906369.IsPrime(); // true
 ```

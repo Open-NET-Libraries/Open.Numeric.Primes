@@ -195,12 +195,22 @@ public static class PrimeNumbers
 
 		foreach (var p in FirstNotInt32.Select(i => (ulong)i).ToArray())
 			i.IsPrime(p).Should().BeFalse();
+
+		var o = Prime<ulong>.Numbers;
+		firstPrime.Should().BeEquivalentTo(o.Take(KnownLen));
+		firstPrime.Should().BeEquivalentTo(o.InParallel().Take(KnownLen));
+
+		foreach (var p in firstPrime)
+			o.IsPrime(p).Should().BeTrue();
+
+		foreach (var p in FirstNotInt32.Select(n => (ulong)n).ToArray())
+			o.IsPrime(p).Should().BeFalse();
 	}
 
 	static void PrimesTestBig<T>()
 		where T : PrimalityBase<BigInteger>, new()
 	{
-		var firstPrime = FirstKnownInt32.Select(i => (BigInteger)i).ToArray();
+		var firstPrime = FirstKnownInt32.Select(n => (BigInteger)n).ToArray();
 		var i = new T();
 		firstPrime.Should().BeEquivalentTo(i.Take(KnownLen));
 		firstPrime.Should().BeEquivalentTo(i.InParallel().Take(KnownLen));
@@ -210,6 +220,17 @@ public static class PrimeNumbers
 
 		foreach (var p in FirstNotInt32.Select(i => (BigInteger)i).ToArray())
 			i.IsPrime(p).Should().BeFalse();
+
+		var o = Prime<BigInteger>.Numbers;
+		firstPrime.Should().BeEquivalentTo(o.Take(KnownLen));
+		firstPrime.Should().BeEquivalentTo(o.InParallel().Take(KnownLen));
+
+		foreach (var p in firstPrime)
+			o.IsPrime(p).Should().BeTrue();
+
+		foreach (var p in FirstNotInt32.Select(n => (BigInteger)n).ToArray())
+			o.IsPrime(p).Should().BeFalse();
+
 	}
 
 	[Fact]

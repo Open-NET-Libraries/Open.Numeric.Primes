@@ -41,7 +41,7 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 	}
 
 	/// <inheritdoc />
-	public override IEnumerable<KeyValuePair<uint, uint>> Indexed()
+	public new IEnumerable<KeyValuePair<uint, uint>> Indexed()
 	{
 		uint count = 0U;
 		foreach (var n in this)
@@ -91,7 +91,8 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 	public IEnumerable<int> Factors(int value)
 		=> value < 0
 		? Factors(-value).Select(e => -e)
-		: Factors(value);
+		: Factors((uint)value)
+			.Select(i => unchecked((int)i));
 
 	/// <summary>
 	/// Returns true if the value can be factored. (Is not prime.)

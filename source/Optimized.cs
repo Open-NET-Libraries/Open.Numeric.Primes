@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -40,9 +41,51 @@ public class Optimized : PrimalityU64Base
 		public override ParallelQuery<BigInteger> InParallel(in BigInteger startingAt, int? degreeOfParallelism = null)
 			=> startingAt >= ulong.MaxValue
 				? base.InParallel(in startingAt, degreeOfParallelism)
-				: new Optimized()
+				: Prime.Numbers
 					.InParallel((ulong)startingAt, degreeOfParallelism)
 					.Select(u => new BigInteger(u))
 					.Concat(base.InParallel(ulong.MaxValue, degreeOfParallelism));
 	}
 }
+
+#if NET7_0_OR_GREATER
+/// <summary>
+/// A prime utility that choses the optimal algorithm depending the type of the number
+/// and can process new <see cref="INumber{TSelf}"/> types.
+/// </summary>
+public class Optimized<T> : PrimalityBase<T>
+	where T : notnull, INumber<T>
+{
+	/// <inheritdoc />
+	public override IEnumerator<T> GetEnumerator()
+		=> StartingAt(Number<T>.Two).GetEnumerator();
+
+	/// <inheritdoc />
+	public override bool IsPrime(in T value)
+	{
+		if (value is uint ui)
+			return Number.IsPrime(ui);
+		if (value is ulong ul)
+			return Number.IsPrime(in ul);
+		if(value is int i)
+			return Number.IsPrime(i);
+		if(value is long l)
+			return Number.IsPrime(in l);
+		if (value is double d)
+			return Number.IsPrime(in d);
+		if (value is float f)
+			return Number.IsPrime(f);
+		if (value is decimal dec)
+			return Number.IsPrime(dec);
+		if (value is BigInteger bi)
+			return Number.IsPrime(in bi);
+
+		// No specific type defined? Use Numerics.
+		return base.IsPrime(in value);
+	}
+
+	/// <inheritdoc />
+	protected override bool IsPrimeInternal(in T value)
+		=> Polynomial.IsPrime(in value);
+}
+#endif

@@ -89,4 +89,11 @@ public static class Number
 			? IsPrime((ulong)v)
 			: IsPrime((BigInteger)v);
 	}
+
+#if NET7_0_OR_GREATER
+	/// <inheritdoc cref="IsPrime(ulong)"/>
+	public static bool IsPrime<T>(in T value)
+		where T : INumber<T>
+		=> Prime<T>.Numbers.IsPrime(in value);
+#endif
 }

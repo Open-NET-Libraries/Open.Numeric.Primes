@@ -117,10 +117,18 @@ public static class Candidates
 			n = Number<TN>.Three;
 		}
 
-		while (TN.IsPositive(n))
+		while (true)
 		{
 			yield return n;
-			n += two;
+
+			try
+			{
+				n = checked(n + two);
+			}
+			catch (System.OverflowException)
+			{
+				break;
+			}
 		}
 	}
 
@@ -142,10 +150,18 @@ public static class Candidates
 			n = -Number<TN>.Three;
 		}
 
-		while (TN.IsNegative(n))
+		while (true)
 		{
 			yield return n;
-			n += two;
+
+			try
+			{
+				n = checked(n + two);
+			}
+			catch (System.OverflowException)
+			{
+				break;
+			}
 		}
 	}
 

@@ -39,15 +39,7 @@ public static class Prime
 
 	const float FloatLargestContiguousInt = 16777216;
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// First multiple is always 0, 1 or -1.
-	/// </summary>
-	/// <param name="value">The value to factorize.</param>
-	/// <returns>
-	/// An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.
-	/// Value types may differ depending on the magnitude of the provided value.
-	/// </returns>
+	/// <inheritdoc cref="PrimalityBase{T}.Factors(T)"/>
 	[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
 	public static IEnumerable<float> Factors(float value)
 	{
@@ -83,15 +75,7 @@ public static class Prime
 
 	const double DoubleLargestContiguousInt = 9007199254740992;
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// First multiple is always 0, 1 or -1.
-	/// </summary>
-	/// <param name="value">The value to factorize.</param>
-	/// <returns>
-	/// An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.
-	/// Value types may differ depending on the magnitude of the provided value.
-	/// </returns>
+	/// <inheritdoc cref="PrimalityBase{T}.Factors(T)"/>
 	[SuppressMessage("Style", "IDE0046:Convert to conditional expression")]
 	public static IEnumerable<double> Factors(double value)
 	{
@@ -134,15 +118,7 @@ public static class Prime
 		}
 	}
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// First multiple is always 0, 1 or -1.
-	/// </summary>
-	/// <param name="value">The value to factorize.</param>
-	/// <returns>
-	/// An enumerable that contains the prime factors of the provided value starting with 0, 1, or -1 for sign retention.
-	/// Value types may differ depending on the magnitude of the provided value.
-	/// </returns>
+	/// <inheritdoc cref="PrimalityBase{T}.Factors(T)"/>
 	public static IEnumerable<decimal> Factors(decimal value)
 	{
 		// ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -190,49 +166,25 @@ public static class Prime
 			? Factors(value).Skip(1).TakeWhile(v => v != value)
 			: Factors(value);
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
-	/// Else if the value is prime or not a whole number, then there will be no results.
-	/// </summary>
-	/// <param name="value">The value to factorize.</param>
-	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned..</param>
+	/// <inheritdoc cref="Factors(double, bool)"/>
 	public static IEnumerable<float> Factors(float value, bool omitOneAndValue)
 		=> omitOneAndValue
 			? Factors(value).Skip(1).TakeWhile(v => v != value)
 			: Factors(value);
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// If omitOneAndValue==false, first multiple is always 0 or 1.
-	/// Else if the value is prime, then there will be no results.
-	/// </summary>
-	/// <param name="value">The value to factorize.</param>
-	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+	/// <inheritdoc cref="Factors(double, bool)"/>
 	public static IEnumerable<ulong> Factors(ulong value, bool omitOneAndValue)
 		=> omitOneAndValue
 			? Factors(value).Skip(1).TakeWhile(v => v != value)
 			: Factors(value);
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
-	/// Else if the value is prime, then there will be no results.
-	/// </summary>
-	/// <param name="value">The value to factorize.</param>
-	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+	/// <inheritdoc cref="Factors(double, bool)"/>
 	public static IEnumerable<long> Factors(long value, bool omitOneAndValue)
 		=> omitOneAndValue
 			? Factors(value).Skip(1).TakeWhile(v => v != value)
 			: Factors(value);
 
-	/// <summary>
-	/// Iterates the prime factors of the provided value.
-	/// If omitOneAndValue==false, first multiple is always 0, 1 or -1.
-	/// Else if the value is prime, then there will be no results.
-	/// </summary>
-	/// <param name="value">The value to factorize.</param>
-	/// <param name="omitOneAndValue">If true, only positive integers greater than 1 and less than the number itself are returned.</param>
+	/// <inheritdoc cref="Factors(double, bool)"/>
 	public static IEnumerable<BigInteger> Factors(BigInteger value, bool omitOneAndValue)
 		=> omitOneAndValue
 			? Factors(value).Skip(1).TakeWhile(v => v != value)
@@ -247,11 +199,7 @@ public static class Prime
 		=> CommonFactors(values.Distinct().Select(v => (ulong)Math.Abs(v)))
 			.Select(Convert.ToInt64);
 
-	/// <summary>
-	/// Iterates all the possible common prime factors of the provided numbers.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>An enumerable of the common prime factors.</returns>
+	/// <inheritdoc cref="CommonFactors(IEnumerable{long})"/>
 	public static IEnumerable<ulong> CommonFactors(IEnumerable<ulong> values)
 	{
 		//#if DEBUG
@@ -333,19 +281,11 @@ public static class Prime
 		}
 	}
 
-	/// <summary>
-	/// Iterates all the possible common prime factors of the provided numbers.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>An enumerable of the common prime factors.</returns>
+	/// <inheritdoc cref="CommonFactors(IEnumerable{long})"/>
 	public static IEnumerable<ulong> CommonFactors(params ulong[] values)
 		=> CommonFactors((IEnumerable<ulong>)values);
 
-	/// <summary>
-	/// Iterates all the possible common prime factors of the provided numbers.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>An enumerable of the common prime factors.</returns>
+	/// <inheritdoc cref="CommonFactors(IEnumerable{long})"/>
 	public static IEnumerable<BigInteger> CommonFactors(IEnumerable<BigInteger> values)
 	{
 		// Use a persistent enumerator to get through (or fail) results.
@@ -419,56 +359,150 @@ public static class Prime
 		}
 	}
 
-	/// <summary>
-	/// Iterates all the possible common prime factors of the provided numbers.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>An enumerable of the common prime factors.</returns>
+	/// <inheritdoc cref="CommonFactors(IEnumerable{long})"/>
 	public static IEnumerable<BigInteger> CommonFactors(params BigInteger[] values)
 		=> CommonFactors((IEnumerable<BigInteger>)values);
 
 	/// <summary>
 	/// Returns the greatest common (positive) factor (GCF) of all the provided values.
-	/// Returns 1 if none found.
 	/// </summary>
 	/// <param name="values">The values to find common prime factors from.</param>
 	/// <returns>The greatest common factor or 1 if none found.</returns>
 	public static long GreatestFactor(IEnumerable<long> values)
 		=> CommonFactors(values).Aggregate(1L, (p, c) => p * c);
 
-	/// <summary>
-	/// Returns the greatest common (positive) factor (GCF) of all the provided values.
-	/// Returns 1 if none found.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>The greatest common factor or 1 if none found.</returns>
+	/// <inheritdoc cref="GreatestFactor(IEnumerable{long})"/>
 	public static ulong GreatestFactor(IEnumerable<ulong> values)
 		=> CommonFactors(values).Aggregate(1UL, (p, c) => p * c);
 
-	/// <summary>
-	/// Returns the greatest common (positive) factor (GCF) of all the provided values.
-	/// Returns 1 if none found.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>The greatest common factor or 1 if none found.</returns>
+	/// <inheritdoc cref="GreatestFactor(IEnumerable{long})"/>
 	public static ulong GreatestFactor(params ulong[] values)
 		=> CommonFactors(values).Aggregate(1UL, (p, c) => p * c);
 
-	/// <summary>
-	/// Returns the greatest common (positive) factor (GCF) of all the provided values.
-	/// Returns 1 if none found.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>The greatest common factor or 1 if none found.</returns>
+	/// <inheritdoc cref="GreatestFactor(IEnumerable{long})"/>
 	public static BigInteger GreatestFactor(IEnumerable<BigInteger> values)
 		=> CommonFactors(values).Aggregate(BigInteger.One, (p, c) => p * c);
 
-	/// <summary>
-	/// Returns the greatest common (positive) factor (GCF) of all the provided values.
-	/// Returns 1 if none found.
-	/// </summary>
-	/// <param name="values">The values to find common prime factors from.</param>
-	/// <returns>The greatest common factor or 1 if none found.</returns>
+	/// <inheritdoc cref="GreatestFactor(IEnumerable{long})"/>
 	public static BigInteger GreatestFactor(params BigInteger[] values)
 		=> CommonFactors(values).Aggregate(BigInteger.One, (p, c) => p * c);
+
+#if NET7_0_OR_GREATER
+	/// <inheritdoc cref="PrimalityBase{T}.Factors(T)"/>
+	public static IEnumerable<T> Factors<T>(T value)
+		where T : INumber<T>
+		=> Prime<T>.Numbers.Factors(value);
+
+	/// <inheritdoc cref="Factors(double, bool)"/>
+	public static IEnumerable<T> Factors<T>(T value, bool omitOneAndValue)
+		where T : notnull, INumber<T>
+		=> omitOneAndValue
+			? Factors(value).Skip(1).TakeWhile(v => v != value)
+			: Factors(value);
+
+	/// <inheritdoc cref="CommonFactors(IEnumerable{long})"/>
+	public static IEnumerable<T> CommonFactors<T>(IEnumerable<T> values)
+		where T : notnull, INumber<T>
+	{
+		// Use a persistent enumerator to get through (or fail) results.
+		using var factors = values
+			.Distinct()
+			.Select(v => Factors(v).GetEnumerator())
+			.Memoize();
+
+		var minusOne = -T.One;
+		var maxFactor = minusOne;
+		try
+		{
+			while (true)
+			{
+				// 0 = just starting a loop
+				var current = T.Zero;
+				var retryIndex = minusOne;
+
+			retry:
+				var i = T.Zero; // ** As we progress through the factors, we are attempt to keep track so as to minimize unnecessary iterations.
+				foreach (var e in factors)
+				{
+					if (maxFactor < i)
+					{
+						if (!e.MoveNext() && T.IsZero(e.Current))
+							yield break;
+
+						maxFactor = i;
+					}
+
+					/*	The retryIndex means we came to a point in the list
+						where we may come back to it and need to reuse the existing value
+						before continuing. */
+
+					if (retryIndex == i)
+						retryIndex = minusOne;
+					else if (!e.MoveNext())
+						yield break;
+
+					if (!T.IsZero(current))
+					{
+						// Get the next candidate...
+						while (current > e.Current)
+						{
+							if (!e.MoveNext())
+								yield break;
+						}
+
+						if (current < e.Current)
+						{
+							// Whoops... New first level factor...
+							current = e.Current;
+							retryIndex = i;
+							goto retry;
+						}
+					}
+
+					// Have a match? Keep checking.
+					++i;
+					current = e.Current;
+				}
+
+				// If we arrive here with a valid value, then it is common.
+				if (!T.IsZero(current))
+					yield return current;
+			}
+		}
+		finally
+		{
+			foreach (var d in factors)
+				d.Dispose(); // dispose of the underlying enumerators before disposing the LazyList (.Memoize());
+		}
+	}
+
+	/// <inheritdoc cref="CommonFactors(IEnumerable{long})"/>
+	public static IEnumerable<T> CommonFactors<T>(params T[] values)
+		where T : notnull, INumber<T>
+		=> CommonFactors((IEnumerable<T>)values);
+
+	/// <inheritdoc cref="GreatestFactor(IEnumerable{long})"/>
+	public static T GreatestFactor<T>(IEnumerable<T> values)
+		where T : notnull, INumber<T>
+		=> CommonFactors(values).Aggregate(T.One, (p, c) => p * c);
+
+	/// <inheritdoc cref="GreatestFactor(IEnumerable{long})"/>
+	public static T GreatestFactor<T>(params T[] values)
+		where T : notnull, INumber<T>
+		=> CommonFactors(values).Aggregate(T.One, (p, c) => p * c);
+#endif
 }
+
+#if NET7_0_OR_GREATER
+/// <summary>
+/// A type host for <see cref="Optimized{T}"/> instances.
+/// </summary>
+public static class Prime<T>
+	where T : notnull, INumber<T>
+{
+	/// <summary>
+	/// The default <see cref="Optimized{T}"/> instance.
+	/// </summary>
+	public static readonly Optimized<T> Numbers = new();
+}
+#endif

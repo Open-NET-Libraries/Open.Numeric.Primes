@@ -40,17 +40,6 @@ public abstract class PrimalityU64Base : PrimalityIntegerBase<ulong>
 	}
 
 	/// <inheritdoc />
-	public override IEnumerable<KeyValuePair<ulong, ulong>> Indexed()
-	{
-		ulong count = 0L;
-		foreach (var n in this)
-		{
-			count++;
-			yield return new KeyValuePair<ulong, ulong>(count, n);
-		}
-	}
-
-	/// <inheritdoc />
 	public override IEnumerable<ulong> Factors(ulong value)
 	{
 		if (value == 0UL)
