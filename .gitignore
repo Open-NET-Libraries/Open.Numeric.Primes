@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 source/nuget.config
 /Open.Numeric.Primes.Benchmarks/BenchmarkDotNet.Artifacts/results
+/benchmarks/BenchmarkDotNet.Artifacts/results
