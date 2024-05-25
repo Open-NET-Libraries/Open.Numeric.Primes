@@ -99,7 +99,7 @@ public static class PrimeNumbers
 
 	static readonly ImmutableArray<int> FirstNotInt32
 		= Enumerable
-			.Range(0, FirstKnownInt32.Last())
+			.Range(0, FirstKnownInt32[^1])
 			.Where(i => FirstKnownInt32.BinarySearch(i) == -1)
 			.ToImmutableArray();
 
@@ -230,7 +230,6 @@ public static class PrimeNumbers
 
 		foreach (var p in FirstNotInt32.Select(n => (BigInteger)n).ToArray())
 			o.IsPrime(p).Should().BeFalse();
-
 	}
 
 	[Fact]
