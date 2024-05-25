@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Open.Numeric.Primes;
+﻿namespace Open.Numeric.Primes;
 
 /// <inheritdoc/>
 public abstract class PrimalityIntegerBase<T> : PrimalityBase<T>

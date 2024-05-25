@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Open.Numeric.Primes;
+﻿namespace Open.Numeric.Primes;
 
 internal static class Big
 {

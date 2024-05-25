@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-
-namespace Open.Numeric.Primes;
+﻿namespace Open.Numeric.Primes;
 
 /// <summary>
 /// A prime utility that choses the optimal algorithm depending the size of the number.

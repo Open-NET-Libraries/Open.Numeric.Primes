@@ -5,8 +5,8 @@ using Open.Numeric.Primes.Benchmarks;
 //BenchmarkRunner.Run<IsPrimeBenchmarks>();
 //BenchmarkRunner.Run<DiscoveryBenchmarks.TrialDivision>();
 //BenchmarkRunner.Run<DiscoveryBenchmarks.Polynomial>();
-//BenchmarkRunner.Run<IsPrimePolynomialBenchmarks>();
-BenchmarkRunner.Run<IsPrimeTrialDivisionBenchmarks>();
+BenchmarkRunner.Run<IsPrimePolynomialBenchmarks>();
+//BenchmarkRunner.Run<IsPrimeTrialDivisionBenchmarks>();
 
 //double n = 0;
 //while (n + 1 != n) n++;

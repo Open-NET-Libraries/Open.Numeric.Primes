@@ -1,12 +1,4 @@
 ﻿#if NET7_0_OR_GREATER
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-
 namespace Open.Numeric.Primes;
 
 public abstract partial class PrimalityBase<T>

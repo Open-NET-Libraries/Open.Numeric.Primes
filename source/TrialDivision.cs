@@ -1,10 +1,5 @@
 ﻿using Open.Collections;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace Open.Numeric.Primes;
 

@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-
-namespace Open.Numeric.Primes;
+﻿namespace Open.Numeric.Primes;
 
 /// <summary>
 /// A collection of static methods for acquiring all prime candidates.

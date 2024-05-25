@@ -1,9 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
-
-namespace Open.Numeric.Primes;
+﻿namespace Open.Numeric.Primes;
 
 /// <summary>
 /// Polynomial prime utility.
