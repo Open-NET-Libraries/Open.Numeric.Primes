@@ -3,9 +3,10 @@ using Open.Numeric.Primes.Benchmarks;
 
 //BenchmarkRunner.Run<SquareRootBenchmarks>();
 //BenchmarkRunner.Run<IsPrimeBenchmarks>();
+BenchmarkRunner.Run<DiscoveryBenchmarks.SieveOfEratosthenes>();
 //BenchmarkRunner.Run<DiscoveryBenchmarks.TrialDivision>();
 //BenchmarkRunner.Run<DiscoveryBenchmarks.Polynomial>();
-BenchmarkRunner.Run<IsPrimePolynomialBenchmarks>();
+//BenchmarkRunner.Run<IsPrimePolynomialBenchmarks>();
 //BenchmarkRunner.Run<IsPrimeTrialDivisionBenchmarks>();
 
 //double n = 0;

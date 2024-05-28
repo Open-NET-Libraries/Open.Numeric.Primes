@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
@@ -230,6 +231,37 @@ public static class PrimeNumbers
 
 		foreach (var p in FirstNotInt32.Select(n => (BigInteger)n).ToArray())
 			o.IsPrime(p).Should().BeFalse();
+	}
+
+	public static IEnumerable<int> SieveOfEratosthenesUpto(int lessThan)
+	{
+		yield return 2;
+
+		// Implement the sieve of Eratosthenes
+		var sieve = new bool[lessThan / 2 - 1];
+		for (var n = 3; n < lessThan; n += 2)
+		{
+			var i = n / 2 - 1;
+			// If the is flagged as composite, skip it.
+			if (sieve[i]) continue;
+
+			// If it hasn't been flagged, then it must be prime.
+			yield return n;
+
+			// Flag all multiples of the prime as composite.
+			for (var j = n * n; j < lessThan; j += n)
+			{
+				if(j % 2 == 0) continue;
+				sieve[j / 2 - 1] = true;
+			}
+		}
+	}
+
+	[Fact]
+	public static void SieveOfEratosthenes()
+	{
+		SieveOfEratosthenesUpto(9974)
+			.Should().BeEquivalentTo(FirstKnownInt32);
 	}
 
 	[Fact]

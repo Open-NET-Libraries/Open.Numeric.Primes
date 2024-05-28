@@ -4,7 +4,7 @@ namespace Open.Numeric.Primes.Benchmarks;
 
 public static class DiscoveryBenchmarks
 {
-	const int Max = 1000000;
+	const int Max = 6_542;
 
 	static void Run<T>(IEnumerable<T> source)
 	{
@@ -22,7 +22,7 @@ public static class DiscoveryBenchmarks
 
 	public abstract class BenchBase
 	{
-		[Params(false, true)]
+		//[Params(false, true)]
 		public bool Parallel { get; set; }
 
 		[Params(MemoizeMode.None)]
@@ -73,7 +73,7 @@ public static class DiscoveryBenchmarks
 			}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void U64()
 		{
 			PrimalityU64Base primality = Mode switch
@@ -90,6 +90,40 @@ public static class DiscoveryBenchmarks
 			else
 			{
 				Run(primality);
+			}
+		}
+	}
+
+	[MemoryDiagnoser]
+	public class SieveOfEratosthenes
+	{
+		[Benchmark]
+		public void U32()
+		{
+			Run(SieveOfEratosthenesUpto(65_536));
+		}
+
+		public static IEnumerable<uint> SieveOfEratosthenesUpto(uint lessThan)
+		{
+			yield return 2;
+
+			// Implement the sieve of Eratosthenes
+			var sieve = new bool[lessThan / 2 - 1];
+			for (uint n = 3; n < lessThan; n += 2)
+			{
+				uint i = n / 2 - 1;
+				// If the is flagged as composite, skip it.
+				if (sieve[i]) continue;
+
+				// If it hasn't been flagged, then it must be prime.
+				yield return n;
+
+				// Flag all multiples of the prime as composite.
+				for (uint j = n * n; j < lessThan; j += n)
+				{
+					if (j % 2 == 0) continue;
+					sieve[j / 2 - 1] = true;
+				}
 			}
 		}
 	}
@@ -114,7 +148,7 @@ public static class DiscoveryBenchmarks
 			}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void U64()
 		{
 			if (Parallel)
@@ -127,7 +161,7 @@ public static class DiscoveryBenchmarks
 			}
 		}
 
-		[Benchmark]
+		//[Benchmark]
 		public void BigInt()
 		{
 			if (Parallel)
