@@ -121,7 +121,7 @@ public static class DiscoveryBenchmarks
 				// Flag all multiples of the prime as composite.
 				for (uint j = n * n; j < lessThan; j += n)
 				{
-					if (j % 2 == 0) continue;
+					if ((j & 1) == 0) continue;
 					sieve[j / 2 - 1] = true;
 				}
 			}

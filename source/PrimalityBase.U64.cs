@@ -138,11 +138,9 @@ public abstract class PrimalityU64Base : PrimalityIntegerBase<ulong>
 				return true;
 
 			default:
-
-				if (value % 2UL == 0 || value % 3UL == 0)
-					return false;
-
-				return IsPrimeInternal(in value);
+				return (value & 1) != 0
+					&& value % 3UL != 0
+					&& IsPrimeInternal(in value);
 		}
 	}
 

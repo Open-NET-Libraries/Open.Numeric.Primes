@@ -23,11 +23,9 @@ public static class Polynomial
 				return true;
 
 			default:
-
-				if (value % 2U == 0U || value % 3U == 0U)
-					return false;
-
-				return IsUIntPrime(value);
+				return (value & 1) != 0
+					&& value % 3U != 0U
+					&& IsUIntPrime(value);
 		}
 	}
 
@@ -48,16 +46,15 @@ public static class Polynomial
 			case 0UL:
 			case 1UL:
 				return false;
+
 			case 2UL:
 			case 3UL:
 				return true;
 
 			default:
-
-				if (value % 2UL == 0UL || value % 3UL == 0UL)
-					return false;
-
-				return IsULongPrime(in value);
+				return (value & 1) != 0
+					&& value % 3UL != 0UL
+					&& IsULongPrime(in value);
 		}
 	}
 

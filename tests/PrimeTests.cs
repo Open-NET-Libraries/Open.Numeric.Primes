@@ -233,15 +233,15 @@ public static class PrimeNumbers
 			o.IsPrime(p).Should().BeFalse();
 	}
 
-	public static IEnumerable<int> SieveOfEratosthenesUpto(int lessThan)
+	public static IEnumerable<uint> SieveOfEratosthenesUpto(uint lessThan)
 	{
 		yield return 2;
 
 		// Implement the sieve of Eratosthenes
 		var sieve = new bool[lessThan / 2 - 1];
-		for (var n = 3; n < lessThan; n += 2)
+		for (uint n = 3; n < lessThan; n += 2)
 		{
-			var i = n / 2 - 1;
+			uint i = n / 2 - 1;
 			// If the is flagged as composite, skip it.
 			if (sieve[i]) continue;
 
@@ -249,9 +249,9 @@ public static class PrimeNumbers
 			yield return n;
 
 			// Flag all multiples of the prime as composite.
-			for (var j = n * n; j < lessThan; j += n)
+			for (uint j = n * n; j < lessThan; j += n)
 			{
-				if(j % 2 == 0) continue;
+				if ((j & 1) == 0) continue;
 				sieve[j / 2 - 1] = true;
 			}
 		}

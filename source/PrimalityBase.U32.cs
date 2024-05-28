@@ -119,16 +119,15 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 			case 0U:
 			case 1U:
 				return false;
+
 			case 2U:
 			case 3U:
 				return true;
 
 			default:
-
-				if (value % 2U == 0 || value % 3U == 0)
-					return false;
-
-				return IsPrimeInternal(in value);
+				return (value & 1) != 0
+					&& value % 3U != 0
+					&& IsPrimeInternal(in value);
 		}
 	}
 

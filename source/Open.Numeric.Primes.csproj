@@ -20,7 +20,7 @@
 		<PackageProjectUrl>https://github.com/Open-NET-Libraries/Open.Numeric.Primes/</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Open-NET-Libraries/Open.Numeric.Primes/</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<Version>4.0.1</Version>
+		<Version>4.0.2</Version>
 		<PackageReleaseNotes></PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>

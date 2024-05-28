@@ -27,10 +27,9 @@ public static class MillerRabin
 				return true;
 
 			default:
-				if (value % 2UL == 0 || value % 3UL == 0)
-					return false;
-
-				return IsPrimeInternal(in value);
+				return (value & 1) != 0
+					&& value % 3UL != 0
+					&& IsPrimeInternal(in value);
 		}
 	}
 
@@ -109,7 +108,7 @@ public static class MillerRabin
 		{
 			0 => 1,
 			1 => Mul(1, in a, in mod),
-			_ => p % 2 == 0
+			_ => (p & 1) == 0
 			   ? PowX(Mul(in a, in a, in mod), p / 2, in mod)
 			   : Mul(Pow(in a, p - 1, in mod), in a, in mod),
 		};
@@ -118,7 +117,7 @@ public static class MillerRabin
 	{
 	retry:
 		if (p == 0) return 1;
-		if (p % 2 != 0) return Mul(Pow(a, p - 1, in mod), in a, in mod);
+		if ((p & 1) != 0) return Mul(Pow(a, p - 1, in mod), in a, in mod);
 		a = Mul(in a, in a, in mod);
 		p /= 2;
 		goto retry;
@@ -144,7 +143,7 @@ public static class MillerRabin
 		var d = source - 1;
 		var s = 0;
 
-		while (d % 2 == 0)
+		while ((d & 1) == 0)
 		{
 			d /= 2;
 			s++;
