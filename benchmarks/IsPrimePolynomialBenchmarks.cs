@@ -5,7 +5,6 @@ using System.Numerics;
 namespace Open.Numeric.Primes.Benchmarks;
 
 [MemoryDiagnoser]
-[SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class IsPrimePolynomialBenchmarks
 {
 	const int Size = 2000000;

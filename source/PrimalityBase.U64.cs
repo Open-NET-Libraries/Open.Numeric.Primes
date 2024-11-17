@@ -126,23 +126,15 @@ public abstract class PrimalityU64Base : PrimalityIntegerBase<ulong>
 
 	/// <inheritdoc />
 	public sealed override bool IsPrime(in ulong value)
-	{
-		switch (value)
+		=> value switch
 		{
 			// 0 and 1 are not prime numbers
-			case 0UL:
-			case 1UL:
-				return false;
-			case 2UL:
-			case 3UL:
-				return true;
-
-			default:
-				return (value & 1) != 0
-					&& value % 3UL != 0
-					&& IsPrimeInternal(in value);
-		}
-	}
+			0UL or 1UL => false,
+			2UL or 3UL => true,
+			_ => (value & 1) != 0
+								&& value % 3UL != 0
+								&& IsPrimeInternal(in value),
+		};
 
 	/// <inheritdoc cref="IsPrime(in ulong)" />
 	public bool IsPrime(in int value)

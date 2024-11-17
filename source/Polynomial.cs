@@ -10,24 +10,15 @@ public static class Polynomial
 	/// </summary>
 	/// <param name="value">The value to validate.</param>
 	public static bool IsPrime(uint value)
-	{
-		switch (value)
+		=> value switch
 		{
 			// 0 and 1 are not prime numbers
-			case 0U:
-			case 1U:
-				return false;
-
-			case 2U:
-			case 3U:
-				return true;
-
-			default:
-				return (value & 1) != 0
-					&& value % 3U != 0U
-					&& IsUIntPrime(value);
-		}
-	}
+			0U or 1U => false,
+			2U or 3U => true,
+			_ => (value & 1) != 0
+				&& value % 3U != 0U
+				&& IsUIntPrime(value),
+		};
 
 	/// <inheritdoc cref="IsPrime(uint)"/>
 	public static bool IsPrime(int value)
@@ -39,24 +30,15 @@ public static class Polynomial
 
 	/// <inheritdoc cref="IsPrime(uint)"/>
 	public static bool IsPrime(in ulong value)
-	{
-		switch (value)
+		=> value switch
 		{
 			// 0 and 1 are not prime numbers
-			case 0UL:
-			case 1UL:
-				return false;
-
-			case 2UL:
-			case 3UL:
-				return true;
-
-			default:
-				return (value & 1) != 0
-					&& value % 3UL != 0UL
-					&& IsULongPrime(in value);
-		}
-	}
+			0UL or 1UL => false,
+			2UL or 3UL => true,
+			_ => (value & 1) != 0
+				&& value % 3UL != 0UL
+				&& IsULongPrime(in value),
+		};
 
 	/// <inheritdoc cref="IsPrime(uint)"/>
 	public static bool IsPrime(in BigInteger value)

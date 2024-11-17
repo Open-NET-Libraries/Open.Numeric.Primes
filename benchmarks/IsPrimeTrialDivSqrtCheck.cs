@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Open.Numeric.Primes.Benchmarks;
 
-[SuppressMessage("Performance", "CA1822:Mark members as static")]
 [MemoryDiagnoser]
 public class IsPrimeTrialDivSqrtCheck
 {

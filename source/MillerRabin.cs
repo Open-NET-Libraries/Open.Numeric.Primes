@@ -14,24 +14,15 @@ public static class MillerRabin
 
 	/// <inheritdoc cref="Polynomial.IsPrime(in ulong)"/>
 	public static bool IsPrime(in ulong value)
-	{
-		switch (value)
+		=> value switch
 		{
 			// 0 and 1 are not prime numbers
-			case 0UL:
-			case 1UL:
-				return false;
-
-			case 2UL:
-			case 3UL:
-				return true;
-
-			default:
-				return (value & 1) != 0
-					&& value % 3UL != 0
-					&& IsPrimeInternal(in value);
-		}
-	}
+			0UL or 1UL => false,
+			2UL or 3UL => true,
+			_ => (value & 1) != 0
+				&& value % 3UL != 0
+				&& IsPrimeInternal(in value),
+		};
 
 	/* Based on: https://stackoverflow.com/questions/4236673/sample-code-for-fast-primality-testing-in-c-sharp#4236870 */
 

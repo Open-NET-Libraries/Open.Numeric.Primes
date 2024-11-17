@@ -98,10 +98,7 @@ public static class DiscoveryBenchmarks
 	public class SieveOfEratosthenes
 	{
 		[Benchmark]
-		public void U32()
-		{
-			Run(SieveOfEratosthenesUpto(65_536));
-		}
+		public void U32() => Run(SieveOfEratosthenesUpto(65_536));
 
 		public static IEnumerable<uint> SieveOfEratosthenesUpto(uint lessThan)
 		{

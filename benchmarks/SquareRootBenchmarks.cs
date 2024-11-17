@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace Open.Numeric.Primes.Benchmarks;
 
 [MemoryDiagnoser]
-[SuppressMessage("Performance", "CA1822:Mark members as static")]
 public class SquareRootBenchmarks
 {
 	const int Start = 12;

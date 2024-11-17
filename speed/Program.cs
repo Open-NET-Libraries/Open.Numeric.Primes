@@ -25,7 +25,7 @@ internal static class Program
 		Console.WriteLine();
 		Console.WriteLine("Batch Tests:");
 
-		foreach (var s in Tests().OrderBy(t => t))
+		foreach (var s in Tests().Order())
 			Console.WriteLine(s);
 
 		Console.WriteLine();

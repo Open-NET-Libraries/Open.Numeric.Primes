@@ -112,24 +112,15 @@ public abstract class PrimalityU32Base : PrimalityIntegerBase<uint>
 
 	/// <inheritdoc />
 	public sealed override bool IsPrime(in uint value)
-	{
-		switch (value)
+		=> value switch
 		{
 			// 0 and 1 are not prime numbers
-			case 0U:
-			case 1U:
-				return false;
-
-			case 2U:
-			case 3U:
-				return true;
-
-			default:
-				return (value & 1) != 0
-					&& value % 3U != 0
-					&& IsPrimeInternal(in value);
-		}
-	}
+			0U or 1U => false,
+			2U or 3U => true,
+			_ => (value & 1) != 0
+				&& value % 3U != 0
+				&& IsPrimeInternal(in value),
+		};
 
 	/// <summary>
 	/// Returns <see langword="true"/> if the value provided is prime.

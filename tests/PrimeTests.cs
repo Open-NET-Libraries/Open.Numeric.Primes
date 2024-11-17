@@ -259,10 +259,9 @@ public static class PrimeNumbers
 
 	[Fact]
 	public static void SieveOfEratosthenes()
-	{
-		SieveOfEratosthenesUpto(9974)
-			.Should().BeEquivalentTo(FirstKnownInt32);
-	}
+		=> SieveOfEratosthenesUpto(9974)
+			.Should()
+			.BeEquivalentTo(FirstKnownInt32);
 
 	[Fact]
 	public static void Primes_UIntByDivision() => PrimesTest32<TrialDivision.U32>();
