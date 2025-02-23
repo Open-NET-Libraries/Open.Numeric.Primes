@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Open.Numeric.Primes.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -374,5 +375,29 @@ public static class PrimeNumbers
 					.All(Prime.Numbers.Big.IsPrime)
 			);
 		}
+	}
+
+	[Theory]
+	[InlineData(9223372036854775783UL)]
+	[InlineData(9223372036854775837UL)]
+	[InlineData(9223372036854775907UL)]
+	public static void MillerRabinKnownLargeProbablePrimes(ulong number)
+		=> MillerRabin.IsProbablePrime(number).Should().BeTrue();
+
+	[Theory]
+	[InlineData(9223372036854775783UL)]
+	[InlineData(9223372036854775837UL)]
+	[InlineData(9223372036854775907UL)]
+	public static void KnownLargePrimes(ulong number)
+		=> number.IsPrime().Should().BeTrue();
+
+	[Fact]
+	public static void MillerRabinTest()
+	{
+		foreach (var p in FirstKnownInt32.Select(i => (ulong)i))
+			MillerRabin.IsPrime(p).Should().BeTrue();
+
+		foreach (var p in FirstNotInt32.Select(i => (ulong)i))
+			MillerRabin.IsPrime(p).Should().BeFalse();
 	}
 }
