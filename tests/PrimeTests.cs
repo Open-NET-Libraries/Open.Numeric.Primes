@@ -388,16 +388,29 @@ public static class PrimeNumbers
 	[InlineData(9223372036854775783UL)]
 	[InlineData(9223372036854775837UL)]
 	[InlineData(9223372036854775907UL)]
-	public static void KnownLargePrimes(ulong number)
-		=> number.IsPrime().Should().BeTrue();
+	public static void KnownLargePrimes_TrialDivision(ulong number)
+	{
+		var td = new TrialDivision.U64();
+		td.IsPrime(number).Should().BeTrue();
+	}
+
+	[Theory]
+	[InlineData(9223372036854775783UL)]
+	[InlineData(9223372036854775837UL)]
+	[InlineData(9223372036854775907UL)]
+	public static void KnownLargePrimes_MillerRabin(ulong number)
+		=> MillerRabin.IsPrime(number).Should().BeTrue();
 
 	[Fact]
-	public static void MillerRabinTest()
+	public static void MillerRabinSmokeTest()
 	{
 		foreach (var p in FirstKnownInt32.Select(i => (ulong)i))
 			MillerRabin.IsPrime(p).Should().BeTrue();
 
 		foreach (var p in FirstNotInt32.Select(i => (ulong)i))
 			MillerRabin.IsPrime(p).Should().BeFalse();
+
+		var numbers = new Optimized.BigInt().StartingAt(9223372036854775783UL).Take(2).Count();
+		numbers.Should().Be(2);
 	}
 }

@@ -11,6 +11,7 @@ public static class MillerRabin
 	static readonly ReadOnlyMemory<ulong> AR1 = new ulong[] { 2, 7, 61 };
 	static readonly ReadOnlyMemory<ulong> AR2 = new ulong[] { 2, 3, 5, 7, 11, 13, 17 };
 	static readonly ReadOnlyMemory<ulong> AR3 = new ulong[] { 2, 3, 5, 7, 11, 13, 17, 19, 23 };
+	static readonly ReadOnlyMemory<BigInteger> AR4 = new BigInteger[] { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 };
 
 	/// <inheritdoc cref="Polynomial.IsPrime(in ulong)"/>
 	public static bool IsPrime(in ulong value)
@@ -28,15 +29,51 @@ public static class MillerRabin
 
 	internal static bool IsPrimeInternal(in ulong value)
 	{
+		if (value > 9223372036854775783UL)
+			return IsPrimeBigIntInternal(value);
+
 		ReadOnlySpan<ulong> ar
-			= value < 4759123141UL
+			= value < 4_759_123_142UL
 			? AR1.Span
-			: value < 341550071728321UL
+			: value < 3_415_500_717_283_212UL
 			? AR2.Span
 			: AR3.Span;
 
 		var d = value - 1;
 		var s = 0;
+
+		while ((d & 1) == 0) { d >>= 1; s++; }
+
+		for (var i = 0; i < ar.Length; i++)
+		{
+			ref readonly var b = ref ar[i];
+			var a = value - 2;
+			var now = a > b
+				? Pow(in b, in d, in value)
+				: Pow(in a, in d, in value);
+
+			if (now == 1) continue;
+			if (now == value - 1) continue;
+			int j;
+			for (j = 1; j < s; j++)
+			{
+				now = Mul(in now, in now, in value);
+				if (now == value - 1) break;
+			}
+
+			if (j == s) return false;
+		}
+
+		return true;
+	}
+
+
+	internal static bool IsPrimeBigIntInternal(in BigInteger value)
+	{
+		ReadOnlySpan<BigInteger> ar = AR4.Span;
+		BigInteger d = value - 1;
+		var s = 0;
+
 		while ((d & 1) == 0) { d >>= 1; s++; }
 
 		for (var i = 0; i < ar.Length; i++)
@@ -78,21 +115,21 @@ public static class MillerRabin
 		return now;
 	}
 
-	//static BigInteger Mul(in BigInteger a, in BigInteger b, in BigInteger mod)
-	//{
-	//	int i;
-	//	var now = BigInteger.Zero;
-	//	for (i = 63; i >= 0; i--) if (((a >> i) & 1) == 1) break;
-	//	for (; i >= 0; i--)
-	//	{
-	//		now <<= 1;
-	//		while (now > mod) now -= mod;
-	//		if (((a >> i) & 1) == 1) now += b;
-	//		while (now > mod) now -= mod;
-	//	}
+	static BigInteger Mul(in BigInteger a, in BigInteger b, in BigInteger mod)
+	{
+		int i;
+		var now = BigInteger.Zero;
+		for (i = 63; i >= 0; i--) if (((a >> i) & 1) == 1) break;
+		for (; i >= 0; i--)
+		{
+			now <<= 1;
+			while (now > mod) now -= mod;
+			if (((a >> i) & 1) == 1) now += b;
+			while (now > mod) now -= mod;
+		}
 
-	//	return now;
-	//}
+		return now;
+	}
 
 	static ulong Pow(in ulong a, in ulong p, in ulong mod)
 		=> p switch
@@ -104,7 +141,28 @@ public static class MillerRabin
 			   : Mul(Pow(in a, p - 1, in mod), in a, in mod),
 		};
 
+	static BigInteger Pow(in BigInteger a, in BigInteger p, in BigInteger mod)
+	{
+		if (p.Equals(BigInteger.Zero)) return BigInteger.One;
+		if (p.Equals(BigInteger.One)) return Mul(1, in a, in mod);
+
+		// Passed simple tests.
+		return (p & 1) == 0
+			? PowX(Mul(in a, in a, in mod), p / 2, in mod)
+			: Mul(Pow(in a, p - 1, in mod), in a, in mod);
+	}
+
 	static ulong PowX(ulong a, ulong p, in ulong mod)
+	{
+	retry:
+		if (p == 0) return 1;
+		if ((p & 1) != 0) return Mul(Pow(a, p - 1, in mod), in a, in mod);
+		a = Mul(in a, in a, in mod);
+		p /= 2;
+		goto retry;
+	}
+
+	static BigInteger PowX(BigInteger a, BigInteger p, in BigInteger mod)
 	{
 	retry:
 		if (p == 0) return 1;

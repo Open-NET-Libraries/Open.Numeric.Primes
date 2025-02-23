@@ -242,3 +242,7 @@ dotnet_style_prefer_simplified_boolean_expressions = true:warning
 dotnet_style_prefer_conditional_expression_over_assignment = true:warning
 dotnet_style_prefer_conditional_expression_over_return = true:warning
 dotnet_style_explicit_tuple_names = true:suggestion
+
+# Simplify collection initialization
+dotnet_diagnostic.IDE0305.severity = none
+dotnet_diagnostic.IDE0306.severity = none

@@ -26,6 +26,7 @@ public class SquareRootBenchmarks
 		{
 			result = (int)Math.Sqrt(i);
 		}
+
 		return result;
 	}
 
