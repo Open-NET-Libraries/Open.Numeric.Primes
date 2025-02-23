@@ -3,8 +3,12 @@ using Open.Numeric.Primes.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Open.Numeric.Primes.Tests;
@@ -413,4 +417,33 @@ public static class PrimeNumbers
 		var numbers = new Optimized.BigInt().StartingAt(9223372036854775783UL).Take(2).Count();
 		numbers.Should().Be(2);
 	}
+
+	//const ulong start = 9223372036854775783UL;
+	//const ulong range = 100_000UL;
+	//const int expectedPrimeCount = 2_292;
+
+	//static IEnumerable<ulong> NumbersToValidate()
+	//{
+	//	for (var i = 0UL; i < range; i += 2)
+	//	{
+	//		yield return start + i;
+	//	}
+	//}
+
+	//[Fact] // Ver long running.
+	//public static void MillerRabinLargeULongTest()
+	//{
+	//	var count = 0;
+	//	var td = new TrialDivision.U64();
+	//	Parallel.ForEach(NumbersToValidate(), (i, loop) =>
+	//	{
+	//		if (!i.IsPrime()) return;
+	//		Interlocked.Increment(ref count);
+	//		var check = td.IsPrime(i);
+	//		if (!check)
+	//			loop.Stop();
+	//	});
+
+	//	count.Should().Be(expectedPrimeCount);
+	//}
 }
